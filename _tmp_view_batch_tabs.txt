@@ -1,0 +1,251 @@
+﻿@extends('admin.layouts.layout')
+
+@section('content')
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <div class="admin-main-card">
+            <div class="admin-main-card-inner">
+                <h4 class="admin-page-title">
+                    <i class="bx bx-user"></i>
+                    Teacher Details
+                </h4>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0" style="font-size: 0.86rem; color: var(--color-text-secondary);">
+                        <li class="breadcrumb-item">
+                            <a href="{{ route('dashboard') }}" class="text-decoration-none"
+                                style="color: var(--color-text-secondary);">Dashboard</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="{{ route('admin.master.teacher') }}" class="text-decoration-none"
+                                style="color: var(--color-text-secondary);">Teacher</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page" style="color: var(--iv-primary);">Priya Mehta</li>
+                    </ol>
+                </nav>
+
+                <div class="admin-detail-block mt-4">
+                    <div class="row g-4">
+                        <div class="col-lg-4">
+                            <div class="d-flex flex-column align-items-start gap-3">
+                                <img src="{{ asset('admin-assets/img/avatars/1.png') }}" alt="Priya Mehta"
+                                    class="master-profile-avatar">
+                                <div>
+                                    <h5 class="mb-1" style="color: var(--iv-primary-dark);">Priya Mehta</h5>
+                                    <span class="admin-status-pill is-active">Active</span>
+                                </div>
+                                <div class="w-100" style="font-size: 0.9rem; color: var(--iv-text);">
+                                    <div class="mb-2"><strong style="color: var(--iv-primary);">Branch:</strong> Mehsana Main</div>
+                                    <div class="mb-2"><strong style="color: var(--iv-primary);">Mobile:</strong> 98765 10001</div>
+                                    <div class="mb-2"><strong style="color: var(--iv-primary);">Email:</strong> priya@ivclasses.com</div>
+                                    <div class="mb-2"><strong style="color: var(--iv-primary);">Specialization:</strong> Maths</div>
+                                    <div class="mb-2"><strong style="color: var(--iv-primary);">Login Time:</strong> 8:00 AM</div>
+                                    <div class="mb-2"><strong style="color: var(--iv-primary);">Grace:</strong> 10 minutes</div>
+                                    <div><strong style="color: var(--iv-primary);">Address:</strong> Near Bus Stand, Mehsana</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-8">
+                            <ul class="nav nav-pills master-tabs gap-2 mb-3" role="tablist">
+                                <li class="nav-item">
+                                    <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tabAttendance" type="button">Attendance</button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tabBatches" type="button">Batches</button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tabLogin" type="button">Login History</button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tabWork" type="button">Assign Work List</button>
+                                </li>
+                            </ul>
+
+                            <div class="tab-content">
+                                {{-- ATTENDANCE --}}
+                                <div class="tab-pane fade show active" id="tabAttendance">
+                                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                                        <h6 class="mb-0" style="color: var(--iv-primary-dark);">July 2026</h6>
+                                        <button type="button" class="btn btn-sm btn-outline-primary">
+                                            <i class="bx bx-export me-1"></i> Export
+                                        </button>
+                                    </div>
+                                    <div class="master-att-cal mb-2">
+                                        <div class="dow">Mon</div><div class="dow">Tue</div><div class="dow">Wed</div>
+                                        <div class="dow">Thu</div><div class="dow">Fri</div><div class="dow">Sat</div><div class="dow">Sun</div>
+                                        <div class="master-att-day is-empty"></div>
+                                        <div class="master-att-day is-empty"></div>
+                                        <div class="master-att-day is-present">1</div>
+                                        <div class="master-att-day is-present">2</div>
+                                        <div class="master-att-day is-late">3</div>
+                                        <div class="master-att-day is-present">4</div>
+                                        <div class="master-att-day is-holiday">5</div>
+                                        <div class="master-att-day is-present">6</div>
+                                        <div class="master-att-day is-absent">7</div>
+                                        <div class="master-att-day is-present">8</div>
+                                        <div class="master-att-day is-present">9</div>
+                                        <div class="master-att-day is-leave">10</div>
+                                        <div class="master-att-day is-present">11</div>
+                                        <div class="master-att-day is-holiday">12</div>
+                                        <div class="master-att-day is-present">13</div>
+                                        <div class="master-att-day is-late">14</div>
+                                        <div class="master-att-day is-present">15</div>
+                                        <div class="master-att-day is-present">16</div>
+                                        <div class="master-att-day is-present">17</div>
+                                        <div class="master-att-day is-present">18</div>
+                                        <div class="master-att-day is-holiday">19</div>
+                                        <div class="master-att-day is-present">20</div>
+                                        <div class="master-att-day is-absent">21</div>
+                                        <div class="master-att-day is-present">22</div>
+                                        <div class="master-att-day is-present">23</div>
+                                        <div class="master-att-day is-present">24</div>
+                                        <div class="master-att-day is-late">25</div>
+                                        <div class="master-att-day is-holiday">26</div>
+                                        <div class="master-att-day is-present">27</div>
+                                        <div class="master-att-day is-present">28</div>
+                                        <div class="master-att-day is-late">29</div>
+                                        <div class="master-att-day is-present">30</div>
+                                        <div class="master-att-day is-present">31</div>
+                                    </div>
+                                    <div class="master-att-legend">
+                                        <span><i class="master-att-dot is-present"></i> Present</span>
+                                        <span><i class="master-att-dot is-absent"></i> Absent</span>
+                                        <span><i class="master-att-dot is-late"></i> Late Present</span>
+                                        <span><i class="master-att-dot is-leave"></i> Leave</span>
+                                        <span><i class="master-att-dot is-holiday"></i> Holiday</span>
+                                    </div>
+                                </div>
+
+                                {{-- BATCHES --}}
+                                <div class="tab-pane fade" id="tabBatches">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="master-batch-card">
+                                                <strong>Morning A</strong>
+                                                <div class="text-muted small mt-1">5th â€” Navodaya</div>
+                                                <div class="mt-2" style="color: var(--iv-primary); font-weight: 700;">8:00 AM â€“ 9:00 AM</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="master-batch-card">
+                                                <strong>Maths Boost</strong>
+                                                <div class="text-muted small mt-1">8th â€” CBSE</div>
+                                                <div class="mt-2" style="color: var(--iv-primary); font-weight: 700;">4:00 PM â€“ 5:00 PM</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="master-batch-card">
+                                                <strong>Evening B</strong>
+                                                <div class="text-muted small mt-1">10th â€” Board</div>
+                                                <div class="mt-2" style="color: var(--iv-primary); font-weight: 700;">6:00 PM â€“ 7:30 PM</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- LOGIN HISTORY --}}
+                                <div class="tab-pane fade" id="tabLogin">
+                                    <div class="d-flex justify-content-end mb-3">
+                                        <button type="button" class="btn btn-sm btn-outline-primary">
+                                            <i class="bx bx-export me-1"></i> Export
+                                        </button>
+                                    </div>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="master-login-card">
+                                                <div class="d-flex justify-content-between align-items-start gap-2">
+                                                    <div>
+                                                        <strong>Wed</strong>
+                                                        <div class="meta">29 Jul 2026</div>
+                                                    </div>
+                                                    <span class="admin-status-pill is-navy" style="background: rgba(var(--iv-warning-rgb), 0.18); color: #8a6418;">Late Present</span>
+                                                </div>
+                                                <div class="mt-2 fw-semibold" style="color: var(--iv-primary-dark);">5th â€” Navodaya</div>
+                                                <div class="meta">Batch: 8:00 AM â€“ 9:00 AM</div>
+                                                <div class="meta mt-1">In 10:04 AM Â· Out 10:05 AM</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="master-login-card">
+                                                <div class="d-flex justify-content-between align-items-start gap-2">
+                                                    <div>
+                                                        <strong>Tue</strong>
+                                                        <div class="meta">28 Jul 2026</div>
+                                                    </div>
+                                                    <span class="admin-status-pill is-active">Present</span>
+                                                </div>
+                                                <div class="mt-2 fw-semibold" style="color: var(--iv-primary-dark);">8th â€” CBSE</div>
+                                                <div class="meta">Batch: 4:00 PM â€“ 5:00 PM</div>
+                                                <div class="meta mt-1">In 3:55 PM Â· Out 5:02 PM</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="master-login-card">
+                                                <div class="d-flex justify-content-between align-items-start gap-2">
+                                                    <div>
+                                                        <strong>Mon</strong>
+                                                        <div class="meta">27 Jul 2026</div>
+                                                    </div>
+                                                    <span class="admin-status-pill is-muted" style="background: rgba(var(--iv-error-rgb), 0.12); color: #a33a36;">Absent</span>
+                                                </div>
+                                                <div class="mt-2 fw-semibold" style="color: var(--iv-primary-dark);">Morning A</div>
+                                                <div class="meta">Batch: 8:00 AM â€“ 9:00 AM</div>
+                                                <div class="meta mt-1">No punch recorded</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- ASSIGN WORK --}}
+                                <div class="tab-pane fade" id="tabWork">
+                                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                                        <div class="fw-semibold" style="color: var(--iv-primary);">Date: 29 Jul 2026</div>
+                                        <button type="button" class="btn btn-sm btn-outline-primary">
+                                            <i class="bx bx-export me-1"></i> Export
+                                        </button>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table admin-list-table align-middle mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Task Name</th>
+                                                    <th>Reason</th>
+                                                    <th>Task Date</th>
+                                                    <th>Action Date</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Check homework copies</td>
+                                                    <td>Pending from weekend</td>
+                                                    <td>28 Jul 2026</td>
+                                                    <td>29 Jul 2026</td>
+                                                    <td><span class="admin-status-pill is-active">Done</span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Parent call â€” fee follow-up</td>
+                                                    <td>Due reminder</td>
+                                                    <td>29 Jul 2026</td>
+                                                    <td>â€”</td>
+                                                    <td><span class="admin-status-pill is-navy">Pending</span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Exam marks entry</td>
+                                                    <td>Unit test 2</td>
+                                                    <td>27 Jul 2026</td>
+                                                    <td>28 Jul 2026</td>
+                                                    <td><span class="admin-status-pill is-active">Done</span></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+

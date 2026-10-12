@@ -1,0 +1,349 @@
+﻿@extends('admin.layouts.layout')
+
+@section('content')
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <div class="admin-main-card">
+            <div class="admin-main-card-inner">
+                <h4 class="admin-page-title">
+                    <i class="bx bx-show"></i>
+                    View Batch
+                </h4>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0" style="font-size: 0.86rem; color: var(--color-text-secondary);">
+                        <li class="breadcrumb-item">
+                            <a href="{{ route('dashboard') }}" class="text-decoration-none"
+                                style="color: var(--color-text-secondary);">Dashboard</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="{{ route('admin.master.batch') }}" class="text-decoration-none"
+                                style="color: var(--color-text-secondary);">Batches</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page" style="color: var(--iv-primary);">Morning A</li>
+                    </ol>
+                </nav>
+
+                <div class="master-info-bar">
+                    <div>
+                        <strong>Morning A</strong>
+                        <div style="font-size: 0.82rem; opacity: 0.9;">5th â€” Navodaya Â· Mehsana Main</div>
+                    </div>
+                    <span>Created at: 12 Jun 2026, 10:24 AM</span>
+                </div>
+
+                <ul class="nav nav-pills master-tabs gap-2 flex-wrap mt-4 mb-3" role="tablist">
+                    <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tabBatchDetails" type="button">Batch Details</button></li>
+                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tabAttendance" type="button">Attendance</button></li>
+                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tabStudents" type="button">Students</button></li>
+                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tabExam" type="button">Exam</button></li>
+                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tabHomework" type="button">Home Work</button></li>
+                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tabAttReport" type="button">Attendance Report</button></li>
+                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tabNotice" type="button">Notice</button></li>
+                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tabAssign" type="button" data-bs-toggle-modal>Assign Batch</button></li>
+                </ul>
+
+                <div class="tab-content">
+                    {{-- BATCH DETAILS --}}
+                    <div class="tab-pane fade show active" id="tabBatchDetails">
+                        <div class="row g-3">
+                            <div class="col-lg-7">
+                                <div class="master-batch-card">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <strong>Batch details</strong>
+                                        <span class="admin-status-pill is-active">Active</span>
+                                    </div>
+                                    <div class="row g-2" style="font-size: 0.88rem;">
+                                        <div class="col-sm-6"><span class="text-muted">Batch name</span><div class="fw-semibold" style="color: var(--iv-primary-dark);">Morning A</div></div>
+                                        <div class="col-sm-6"><span class="text-muted">Standard</span><div class="fw-semibold" style="color: var(--iv-primary-dark);">5th â€” Navodaya</div></div>
+                                        <div class="col-sm-6"><span class="text-muted">Branch</span><div class="fw-semibold" style="color: var(--iv-primary-dark);">Mehsana Main</div></div>
+                                        <div class="col-sm-6"><span class="text-muted">Subject</span><div class="fw-semibold" style="color: var(--iv-primary-dark);">Maths</div></div>
+                                        <div class="col-sm-6"><span class="text-muted">Timing</span><div class="fw-semibold" style="color: var(--iv-primary-dark);">8:00 AM â€“ 9:00 AM</div></div>
+                                        <div class="col-sm-6"><span class="text-muted">Total students</span><div class="fw-semibold" style="color: var(--iv-primary-dark);">26</div></div>
+                                        <div class="col-12"><span class="text-muted">Classes</span><div class="fw-semibold" style="color: var(--iv-primary-dark);">IV Classes</div></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-5">
+                                <div class="mb-2 fw-semibold" style="color: var(--iv-primary);">Teachers</div>
+                                <div class="row g-2">
+                                    <div class="col-12">
+                                        <div class="master-teacher-chip">
+                                            <img class="avatar" src="{{ asset('admin-assets/img/avatars/1.png') }}" alt="">
+                                            <div>
+                                                <div class="t-name">Priya Mehta</div>
+                                                <div class="t-meta">98765 10001 Â· ID: TCH-014</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="master-teacher-chip">
+                                            <img class="avatar" src="{{ asset('admin-assets/img/avatars/2.png') }}" alt="">
+                                            <div>
+                                                <div class="t-name">Amit Joshi</div>
+                                                <div class="t-meta">98765 10002 Â· ID: TCH-021</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- ATTENDANCE --}}
+                    <div class="tab-pane fade" id="tabAttendance">
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="mb-0 fw-semibold" style="color: var(--iv-primary);">Date</label>
+                                <input type="date" class="form-control form-control-sm" style="width: auto;" value="2026-08-21">
+                            </div>
+                            <a href="{{ route('admin.master.batch.add_attendance') }}" class="btn btn-sm"
+                                style="background: var(--iv-primary); color: #fff;">
+                                <i class="bx bx-plus me-1"></i> Add Attendance
+                            </a>
+                        </div>
+                        <div class="master-batch-card">
+                            <div class="text-muted" style="font-size: 0.9rem;">
+                                Select a date and click <strong>Add Attendance</strong> to mark present / absent / late for this batch.
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- STUDENTS --}}
+                    <div class="tab-pane fade" id="tabStudents">
+                        <div class="d-flex justify-content-end mb-3">
+                            <button type="button" class="btn btn-sm btn-outline-primary">
+                                <i class="bx bx-export me-1"></i> Export Student List
+                            </button>
+                        </div>
+                        <div class="row g-3">
+                            @foreach ([
+                                ['Gelot Pulkit', 'STU-102', '2', 'Aaileshbhai', '98765 22001'],
+                                ['Patel Rutvi', 'STU-103', '3', 'Kishankumar', '98765 22002'],
+                                ['Shah Aarav', 'STU-104', '4', 'Nileshbhai', '98765 22003'],
+                                ['Mehta Diya', 'STU-105', '5', 'Rajeshbhai', '98765 22004'],
+                                ['Joshi Kabir', 'STU-106', '6', 'Hiteshbhai', '98765 22005'],
+                                ['Desai Anaya', 'STU-107', '7', 'Manojbhai', '98765 22006'],
+                            ] as $s)
+                                <div class="col-md-6 col-xl-4">
+                                    <div class="master-student-card">
+                                        <div class="s-name">{{ $s[0] }}</div>
+                                        <div class="s-meta">ID: {{ $s[1] }} Â· Roll: {{ $s[2] }}</div>
+                                        <div class="s-meta">Father: {{ $s[3] }}</div>
+                                        <div class="s-meta">{{ $s[4] }}</div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    {{-- EXAM --}}
+                    <div class="tab-pane fade" id="tabExam">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="master-exam-card">
+                                    <strong>Maths</strong>
+                                    <div class="text-muted small mt-1">11 May 2026</div>
+                                    <div class="mt-2" style="font-size: 0.86rem; color: var(--iv-primary-dark);">
+                                        Timing: 1.00 Hr Â· Maximum Marks: 20
+                                    </div>
+                                    <div class="mt-2" style="font-size: 0.84rem; color: var(--iv-text-secondary);">
+                                        Exam Text: exercise 3.1 and 3.2
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="master-exam-card">
+                                    <strong>Science</strong>
+                                    <div class="text-muted small mt-1">18 May 2026</div>
+                                    <div class="mt-2" style="font-size: 0.86rem; color: var(--iv-primary-dark);">
+                                        Timing: 1.30 Hr Â· Maximum Marks: 25
+                                    </div>
+                                    <div class="mt-2" style="font-size: 0.84rem; color: var(--iv-text-secondary);">
+                                        Exam Text: Chapter 4 â€” Forces &amp; Motion
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="master-exam-card">
+                                    <strong>English</strong>
+                                    <div class="text-muted small mt-1">22 May 2026</div>
+                                    <div class="mt-2" style="font-size: 0.86rem; color: var(--iv-primary-dark);">
+                                        Timing: 45 Min Â· Maximum Marks: 15
+                                    </div>
+                                    <div class="mt-2" style="font-size: 0.84rem; color: var(--iv-text-secondary);">
+                                        Exam Text: Unseen passage + grammar worksheet
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- HOMEWORK --}}
+                    <div class="tab-pane fade" id="tabHomework">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="master-hw-card">
+                                    <strong>Maths â€” Exercise 5.2</strong>
+                                    <div class="text-muted small mt-1">Due: 22 Aug 2026</div>
+                                    <div class="mt-2" style="font-size: 0.84rem; color: var(--iv-text-secondary);">
+                                        Complete Q1 to Q8 in notebook. Show full steps.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="master-hw-card">
+                                    <strong>Science â€” Diagram practice</strong>
+                                    <div class="text-muted small mt-1">Due: 23 Aug 2026</div>
+                                    <div class="mt-2" style="font-size: 0.84rem; color: var(--iv-text-secondary);">
+                                        Draw and label plant cell. Submit next class.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- ATTENDANCE REPORT --}}
+                    <div class="tab-pane fade" id="tabAttReport">
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                            <h6 class="mb-0" style="color: var(--iv-primary-dark);">Attendance Month Of August 2026</h6>
+                            <div class="d-flex flex-wrap gap-2 align-items-center">
+                                <select class="form-select form-select-sm" style="width: auto;">
+                                    <option>August</option>
+                                    <option>July</option>
+                                </select>
+                                <select class="form-select form-select-sm" style="width: auto;">
+                                    <option>2026</option>
+                                    <option>2025</option>
+                                </select>
+                                <button type="button" class="btn btn-sm" style="background: var(--iv-primary); color: #fff;">
+                                    <i class="bx bx-export me-1"></i> Export
+                                </button>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                            <select class="form-select form-select-sm" style="width: 70px;">
+                                <option>21</option>
+                                <option>All</option>
+                            </select>
+                            <span class="master-att-badge is-a">A-0</span>
+                            <span class="small text-muted">Absent</span>
+                            <span class="master-att-badge is-p">P-0</span>
+                            <span class="small text-muted">Present</span>
+                            <span class="master-att-badge is-lp">LP-0</span>
+                            <span class="small text-muted">Late Present</span>
+                        </div>
+                        <div class="master-att-report-wrap">
+                            <table class="master-att-report">
+                                <thead>
+                                    <tr>
+                                        <th class="name-col">Name &amp; Roll No</th>
+                                        @for ($d = 1; $d <= 31; $d++)
+                                            @php $isSun = in_array($d, [2, 9, 16, 23, 30], true); @endphp
+                                            <th class="day-head {{ $isSun ? 'is-sun' : '' }}">
+                                                {{ str_pad((string) $d, 2, '0', STR_PAD_LEFT) }}
+                                            </th>
+                                        @endfor
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ([
+                                        'Gelot Pulkit Aaileshbhai | 2',
+                                        'Patel Rutvi Kishankumar | 3',
+                                        'Shah Aarav Nileshbhai | 4',
+                                        'Mehta Diya Rajeshbhai | 5',
+                                    ] as $row)
+                                        <tr>
+                                            <td class="name-col">{{ $row }}</td>
+                                            @for ($d = 1; $d <= 31; $d++)
+                                                @php $isSun = in_array($d, [2, 9, 16, 23, 30], true); @endphp
+                                                <td class="{{ $isSun ? 'is-sun' : '' }}">{{ $isSun ? 'S' : '-' }}</td>
+                                            @endfor
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {{-- NOTICE --}}
+                    <div class="tab-pane fade" id="tabNotice">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="master-notice-card">
+                                    <strong>Parent meeting</strong>
+                                    <div class="text-muted small mt-1">18 Aug 2026</div>
+                                    <div class="mt-2" style="font-size: 0.84rem; color: var(--iv-text-secondary);">
+                                        Parentâ€“teacher meeting on Saturday 10:00 AM at Mehsana Main branch.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="master-notice-card">
+                                    <strong>Holiday notice</strong>
+                                    <div class="text-muted small mt-1">15 Aug 2026</div>
+                                    <div class="mt-2" style="font-size: 0.84rem; color: var(--iv-text-secondary);">
+                                        Institute closed on Independence Day. Classes resume Monday.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- ASSIGN BATCH (opens modal via button above - also show CTA here) --}}
+                    <div class="tab-pane fade" id="tabAssign">
+                        <div class="master-batch-card d-flex flex-wrap align-items-center justify-content-between gap-2">
+                            <div>
+                                <strong>Assign teachers to this batch</strong>
+                                <div class="text-muted small mt-1">Select one or more teachers from the list.</div>
+                            </div>
+                            <button type="button" class="btn btn-sm" style="background: var(--iv-primary); color: #fff;"
+                                data-bs-toggle="modal" data-bs-target="#assignBatchModal">
+                                <i class="bx bx-user-plus me-1"></i> Assign Batch
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="assignBatchModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 16px;">
+                <div class="modal-header">
+                    <h5 class="modal-title" style="color: var(--iv-primary-dark);">Assign Batch â€” Teachers</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <label class="form-label fw-semibold" style="color: var(--iv-primary);">Select teachers (multiple)</label>
+                    <select class="form-select" multiple size="6">
+                        <option selected>Priya Mehta â€” TCH-014</option>
+                        <option>Amit Joshi â€” TCH-021</option>
+                        <option>Neha Shah â€” TCH-033</option>
+                        <option>Ravi Patel â€” TCH-041</option>
+                        <option>Kiran Desai â€” TCH-052</option>
+                    </select>
+                    <div class="form-text">Hold Ctrl / Cmd to select multiple teachers.</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn" style="background: var(--iv-primary); color: #fff;">Save Assignment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@push('scripts')
+    <script>
+        // Open Assign Batch modal when that tab is clicked
+        document.querySelector('[data-bs-target="#tabAssign"]')?.addEventListener('shown.bs.tab', function() {
+            // optional: keep tab content; modal opens via button
+        });
+        document.querySelectorAll('.master-tabs [data-bs-target="#tabAssign"]').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                // also allow direct modal from tab label if desired â€” keep as tab first
+            });
+        });
+    </script>
+@endpush
+

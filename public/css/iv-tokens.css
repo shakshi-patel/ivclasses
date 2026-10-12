@@ -1,0 +1,137 @@
+/* ==========================================================================
+   IV Classes — Design tokens (single source of truth)
+   Matches brand logo: Deep Teal + Premium Gold
+   Admin + Website + Auth share this file.
+   Change colors here only.
+   ========================================================================== */
+
+:root {
+    /* —— Brand palette —— */
+    --iv-primary: #0f5c4d;
+    --iv-primary-dark: #08483d;
+    --iv-primary-light: #dcefea;
+    --iv-secondary: #d9a441;
+    --iv-secondary-light: #f6e8c3;
+    --iv-secondary-dark: #b7862a;
+
+    --iv-bg: #fbf8f1;
+    --iv-surface: #ffffff;
+    --iv-text: #1f2933;
+    --iv-text-secondary: #667085;
+    --iv-border: #e5e7eb;
+
+    --iv-success: #2e8b68;
+    --iv-warning: #e5a72f;
+    --iv-warning-dark: #b9821a;
+    --iv-error: #d9534f;
+    --iv-info: #3b82a0;
+
+    /* —— RGB channels —— */
+    --iv-primary-rgb: 15, 92, 77;
+    --iv-primary-dark-rgb: 8, 72, 61;
+    --iv-secondary-rgb: 217, 164, 65;
+    --iv-text-rgb: 31, 41, 51;
+    --iv-success-rgb: 46, 139, 104;
+    --iv-warning-rgb: 229, 167, 47;
+    --iv-error-rgb: 217, 83, 79;
+    --iv-info-rgb: 59, 130, 160;
+
+    /* —— Semantic aliases —— */
+    --iv-color-bg: var(--iv-bg);
+    --iv-color-surface: var(--iv-surface);
+    --iv-color-text: var(--iv-text);
+    --iv-color-text-muted: var(--iv-text-secondary);
+    --iv-color-border: var(--iv-border);
+    --iv-color-primary: var(--iv-primary);
+    --iv-color-primary-hover: var(--iv-primary-dark);
+    --iv-color-accent: var(--iv-secondary);
+    --iv-color-on-primary: #ffffff;
+    --iv-color-on-dark: #f4faf8;
+    --iv-color-on-dark-muted: rgba(244, 250, 248, 0.72);
+
+    --iv-gradient-brand: linear-gradient(
+        135deg,
+        var(--iv-primary) 0%,
+        var(--iv-primary-dark) 58%,
+        #0a6b58 100%
+    );
+    --iv-gradient-accent: linear-gradient(
+        135deg,
+        var(--iv-secondary) 0%,
+        #c4922f 100%
+    );
+    --iv-gradient-hero: linear-gradient(
+        145deg,
+        rgba(var(--iv-primary-dark-rgb), 0.92) 0%,
+        rgba(var(--iv-primary-rgb), 0.78) 48%,
+        rgba(8, 72, 61, 0.94) 100%
+    );
+
+    /* —— Admin semantic bridge —— */
+    --color-bg-base: var(--iv-bg);
+    --color-bg-elevated: var(--iv-surface);
+    --color-bg-alt: var(--iv-primary-light);
+    --color-bg-dark: var(--iv-primary-dark);
+    --color-bg-dark-elevated: var(--iv-primary);
+
+    --color-text-primary: var(--iv-text);
+    --color-text-secondary: var(--iv-text-secondary);
+    --color-text-tertiary: #98a2b3;
+    --color-text-on-dark: var(--iv-color-on-dark);
+    --color-text-on-dark-muted: var(--iv-color-on-dark-muted);
+
+    --color-accent-primary: var(--iv-primary);
+    --color-accent-primary-hover: var(--iv-primary-dark);
+    --color-accent-secondary: var(--iv-secondary);
+    --color-accent-gold: var(--iv-secondary);
+    --color-accent-purple: var(--iv-info);
+
+    --gradient-brand: var(--iv-gradient-brand);
+    --gradient-brand-soft: linear-gradient(
+        135deg,
+        rgba(var(--iv-primary-rgb), 0.12) 0%,
+        rgba(var(--iv-secondary-rgb), 0.14) 50%,
+        rgba(var(--iv-info-rgb), 0.1) 100%
+    );
+
+    --gf-cream: var(--iv-bg);
+    --gf-charcoal: var(--iv-text);
+    --gf-sand: var(--iv-primary-light);
+    --gf-taupe: var(--iv-secondary);
+    --gf-paper: var(--iv-surface);
+    --gf-ink: var(--iv-text);
+
+    /* —— Website bridge —— */
+    --brand-blue: var(--iv-primary);
+    --brand-navy: var(--iv-primary-dark);
+    --brand-white: var(--iv-surface);
+
+    --text-on-light: var(--iv-text);
+    --text-muted: rgba(var(--iv-text-rgb), 0.62);
+    --text-on-dark: var(--iv-color-on-dark);
+    --text-on-dark-muted: var(--iv-color-on-dark-muted);
+
+    --surface-light: var(--iv-surface);
+    --surface-dark: var(--iv-primary-dark);
+    --surface-blue-soft: rgba(var(--iv-primary-rgb), 0.08);
+    --surface-navy-soft: rgba(var(--iv-primary-dark-rgb), 0.05);
+    --glow-blue: rgba(var(--iv-primary-rgb), 0.32);
+    --line: var(--iv-border);
+
+    --shadow-cta: 0 12px 32px rgba(var(--iv-primary-rgb), 0.28);
+    --shadow-card: 0 12px 40px rgba(var(--iv-text-rgb), 0.07);
+    --shadow-soft: 0 4px 20px rgba(var(--iv-text-rgb), 0.04);
+}
+
+/* Shared presentation utilities (prefer these over inline style=) */
+.iv-text-primary { color: var(--iv-primary) !important; }
+.iv-text-primary-dark { color: var(--iv-primary-dark) !important; }
+.iv-text-sm { font-size: 0.86rem; }
+.iv-amount { color: var(--iv-primary); font-weight: 700; }
+.iv-surface-soft {
+    background: rgba(var(--iv-primary-rgb), 0.08);
+    border: 1px solid rgba(var(--iv-primary-rgb), 0.12);
+}
+.iv-col-action-sm { width: 90px; }
+.iv-col-action-md { width: 110px; }
+.iv-col-action-lg { width: 150px; }
