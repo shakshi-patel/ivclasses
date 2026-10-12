@@ -46,7 +46,7 @@ enum DashboardPersona: string
      */
     private static function roleNames(User $user): array
     {
-        if (! $user->institute_id) {
+        if (!$user->institute_id) {
             return [];
         }
 
@@ -151,7 +151,7 @@ enum DashboardPersona: string
                 ['payment_methods' => 4, 'payments' => 4, 'fee_follow_ups' => 4],
             ],
             self::Receptionist => [
-                ['follow_ups' => 7, 'attention' => 5],
+                ['follow_upss' => 7, 'attention' => 5],
                 ['lead_sources' => 5, 'admissions' => 7],
             ],
             default => [
