@@ -52,7 +52,7 @@ class NoticeController extends AdminController
             ->with(['batches:id,name', 'branches:id,name', 'creator:id,name'])
             ->orderByDesc('notice_date')
             ->orderByDesc('id')
-            ->get();
+            ->get(['id', 'institute_id', 'title', 'body', 'notice_date', 'audience', 'status', 'image_path', 'created_by']);
 
         $filters = $isParent ? ['isPlatform' => false] : $this->listFilterVars($request, ['branches']);
 

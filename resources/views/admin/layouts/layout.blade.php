@@ -2605,7 +2605,7 @@
         }
 
         .master-att-dot.is-leave {
-            background: #6b8fd4;
+            background: #9b6bd4;
         }
 
         .master-att-dot.is-holiday {
@@ -2663,9 +2663,9 @@
         }
 
         .master-att-day.is-leave {
-            background: rgba(107, 143, 212, 0.3);
-            border-color: rgba(61, 90, 158, 0.5);
-            color: #2f4d8a;
+            background: rgba(155, 107, 212, 0.28);
+            border-color: rgba(155, 107, 212, 0.55);
+            color: #5b3a94;
         }
 
         .master-att-day.is-holiday {
@@ -4584,6 +4584,65 @@
             line-height: 1.3;
         }
 
+        .master-notice-card__head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .master-notice-card__head strong {
+            min-width: 0;
+        }
+
+        .master-notice-card__date {
+            flex: 0 0 auto;
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 7px;
+            border-radius: 6px;
+            background: rgba(var(--iv-primary-rgb), 0.08);
+            color: var(--iv-primary);
+            font-size: 0.7rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .master-notice-card__meta {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px 9px;
+            margin-top: 10px;
+            padding-bottom: 9px;
+            border-bottom: 1px solid rgba(var(--iv-primary-rgb), 0.1);
+            color: var(--iv-text-secondary);
+            font-size: 0.7rem;
+            line-height: 1.4;
+        }
+
+        .master-notice-card__tag {
+            padding: 3px 7px;
+            border-radius: 999px;
+            background: rgba(var(--iv-primary-rgb), 0.1);
+            color: var(--iv-primary-dark);
+            font-weight: 700;
+        }
+
+        .master-notice-card__description {
+            margin-top: 10px;
+        }
+
+        .master-notice-card__label {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--iv-primary-dark);
+            font-size: 0.68rem;
+            font-weight: 750;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
         .master-exam-card .c-date,
         .master-hw-card .c-date,
         .master-notice-card .c-date {
@@ -4603,8 +4662,20 @@
         .master-notice-card .c-body {
             font-size: 0.76rem;
             color: var(--iv-text-secondary);
-            margin-top: 6px;
             line-height: 1.4;
+        }
+
+        .notice-description-cell {
+            min-width: 260px;
+            max-width: 460px;
+            color: var(--iv-text-secondary) !important;
+            line-height: 1.5;
+        }
+
+        .notice-date-cell {
+            min-width: 110px;
+            white-space: nowrap;
+            font-weight: 650;
         }
 
         .master-roll-grid {
@@ -4781,6 +4852,11 @@
 
         .master-att-badge.is-h {
             background: #6b8fd4;
+            color: #fff;
+        }
+
+        .master-att-badge.is-lv {
+            background: #9b6bd4;
             color: #fff;
         }
 
@@ -5266,6 +5342,7 @@
     <script src="{{ asset('admin-assets/vendor/libs/select2/select2.js') }}"></script>
     <script src="{{ asset('admin-assets/vendor/libs/sweetalert2/sweetalert2.js') }}"></script>
     <script src="{{ asset('admin-assets/js/admin-searchable-select.js') }}"></script>
+    <script src="{{ asset('admin-assets/js/phone-input-guard.js') }}"></script>
     <script src="{{ asset('admin-assets/js/admin-institute-cascade.js') }}"></script>
     <script src="{{ asset('admin-assets/js/admin-ajax.js') }}"></script>
     <script src="{{ asset('admin-assets/vendor/libs/shepherd/shepherd.js') }}"></script>

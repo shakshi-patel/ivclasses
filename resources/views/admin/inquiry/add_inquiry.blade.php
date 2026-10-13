@@ -115,7 +115,7 @@
                                     <div class="col-md-6">
                                         <label class="form-label">Father Phone <span class="req">*</span></label>
                                         <input type="text" class="form-control" name="father_phone" required
-                                            maxlength="15" inputmode="numeric"
+                                            maxlength="15" inputmode="numeric" data-phone-input
                                             value="{{ old('father_phone', $inquiry?->phone) }}">
                                     </div>
                                     <div class="col-md-6">

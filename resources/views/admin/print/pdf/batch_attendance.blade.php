@@ -111,6 +111,7 @@
         .badge.is-p { background: #2f9e6a; }
         .badge.is-a { background: #d64545; }
         .badge.is-lp { background: #e09b2d; color: #2c2208; }
+        .badge.is-lv { background: #9b6bd4; }
         .badge.is-h { background: #5b7fc4; }
         .badge.is-s { background: #7a8584; }
         .dash { color: #b0bec5; font-size: 8px; }
@@ -230,6 +231,7 @@
     <span class="legend-item"><span class="badge is-p">P</span> = Present</span>
     <span class="legend-item"><span class="badge is-lp">LP</span> = Late Present</span>
     <span class="legend-item"><span class="badge is-a">A</span> = Absent</span>
+    <span class="legend-item"><span class="badge is-lv">LV</span> = Leave</span>
     <span class="legend-item"><span class="badge is-s">S</span> = Sunday</span>
     <span class="legend-item"><span class="badge is-h">H</span> = Holiday</span>
 </div>

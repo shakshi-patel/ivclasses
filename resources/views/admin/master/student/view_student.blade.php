@@ -154,6 +154,7 @@
                                         <span><i class="master-att-dot is-present"></i> Present</span>
                                         <span><i class="master-att-dot is-absent"></i> Absent</span>
                                         <span><i class="master-att-dot is-late"></i> Late Present</span>
+                                        <span><i class="master-att-dot is-leave"></i> Leave</span>
                                         <span><span class="master-att-badge is-h">H</span> Holiday</span>
                                     </div>
                                 @endif
@@ -342,13 +343,21 @@
                                     @forelse ($studentNotices ?? [] as $notice)
                                         <div class="col-sm-6 col-xl-4">
                                             <div class="master-notice-card">
-                                                <strong>{{ $notice->title }}</strong>
-                                                <div class="c-date">
-                                                    {{ \App\Models\Notice::AUDIENCES[$notice->audience] ?? ucfirst($notice->audience ?? 'Notice') }}
-                                                    · {{ $notice->scopeLabel() }}
-                                                    · {{ $notice->notice_date?->format('d M Y') ?? '—' }}
+                                                <div class="master-notice-card__head">
+                                                    <strong>{{ $notice->title }}</strong>
+                                                    <span class="master-notice-card__date">
+                                                        <i class="bx bx-calendar me-1"></i>{{ $notice->notice_date?->format('d M Y') ?? '—' }}
+                                                    </span>
                                                 </div>
-                                                <div class="c-body">{{ \Illuminate\Support\Str::limit($notice->body ?? '—', 140) }}</div>
+                                                <div class="master-notice-card__meta">
+                                                    <span class="master-notice-card__tag">
+                                                        <i class="bx bx-git-branch me-1"></i>{{ $student->branch?->name ?? '—' }}
+                                                    </span>
+                                                </div>
+                                                <div class="master-notice-card__description">
+                                                    <span class="master-notice-card__label">Description</span>
+                                                    <div class="c-body">{{ $notice->body ?? '—' }}</div>
+                                                </div>
                                             </div>
                                         </div>
                                     @empty

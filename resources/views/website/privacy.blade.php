@@ -8,7 +8,7 @@
         <div class="page-hero-inner center">
           <p class="eyebrow">Legal</p>
           <h1>Privacy Policy</h1>
-          <p class="section-sub">How IVClasses handles information collected on this marketing website and demo requests.</p>
+          <p class="section-sub">How {{ config('brand.name') }} handles information collected on this marketing website and demo requests.</p>
         </div>
       </div>
     </section>
@@ -51,7 +51,7 @@
           <h2><span class="legal-num">03</span> Storage &amp; access</h2>
           <p>
             Demo requests may be stored in our internal systems (for example CRM, email inbox, or spreadsheet)
-            so the IVClasses team can follow up. Access is limited to people handling demos and onboarding.
+            so the {{ config('brand.name') }} team can follow up. Access is limited to people handling demos and onboarding.
           </p>
         </div>
 

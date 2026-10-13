@@ -76,7 +76,7 @@
 
                             <div class="col-md-3">
                                 <label class="form-label fw-semibold" style="color: var(--iv-primary);">Mobile Number</label>
-                                <input type="text" class="form-control" name="phone" maxlength="15" inputmode="numeric"
+                                <input type="text" class="form-control" name="phone" maxlength="15" inputmode="numeric" data-phone-input
                                     value="{{ old('phone', $teacher?->user?->phone) }}" placeholder="Mobile">
                             </div>
 

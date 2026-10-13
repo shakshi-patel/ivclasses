@@ -439,9 +439,27 @@ return [
         'income_expense' => [
             'name' => 'Income & Expense',
             'enabled' => true,
+            'use_defaults' => false,
+            'soft_delete' => true,
+            'actions' => [
+                'view' => 'View',
+                'add' => 'Add',
+                'delete' => 'Delete',
+                'restore' => 'Restore',
+                'show_total_income' => 'Show Total Income',
+            ],
+        ],
+
+        'income_expense_category' => [
+            'name' => 'Income & Expense Category',
+            'enabled' => true,
             'use_defaults' => true,
             'soft_delete' => true,
-            'actions' => [],
+            'plan_module' => 'income_expense',
+            'inherit_from' => 'income_expense.view',
+            'actions' => [
+                'status' => 'Activate / Deactivate',
+            ],
         ],
 
         'inventory' => [
@@ -450,6 +468,18 @@ return [
             'use_defaults' => true,
             'soft_delete' => true,
             'actions' => [],
+        ],
+
+        'assets_category' => [
+            'name' => 'Assets Category',
+            'enabled' => true,
+            'use_defaults' => true,
+            'soft_delete' => true,
+            'plan_module' => 'inventory',
+            'inherit_from' => 'inventory.view',
+            'actions' => [
+                'status' => 'Activate / Deactivate',
+            ],
         ],
 
         'todo' => [

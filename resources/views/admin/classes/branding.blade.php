@@ -66,7 +66,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Mobile Number</label>
-                                        <input type="text" class="form-control" name="phone" maxlength="15" inputmode="numeric"
+                                        <input type="text" class="form-control" name="phone" maxlength="15" inputmode="numeric" data-phone-input
                                             value="{{ old('phone', $institute->phone) }}">
                                     </div>
                                     <div class="col-md-6">

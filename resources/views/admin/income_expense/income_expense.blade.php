@@ -53,15 +53,17 @@
                 </x-admin.list-filters>
 
                 <div class="row g-3 admin-list-summary">
-                    <div class="col-md-4">
-                        <div class="ie-summary-card is-income">
-                            <div class="ico"><i class="bx bx-trending-up"></i></div>
-                            <div>
-                                <div class="lbl">Total Income</div>
-                                <div class="val">₹{{ number_format((float) ($totals['income'] ?? 0), 2) }}</div>
+                    @if ($canShowTotalIncome ?? false)
+                        <div class="col-md-4">
+                            <div class="ie-summary-card is-income">
+                                <div class="ico"><i class="bx bx-trending-up"></i></div>
+                                <div>
+                                    <div class="lbl">Total Income</div>
+                                    <div class="val">₹{{ number_format((float) ($totals['income'] ?? 0), 2) }}</div>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    @endif
                     <div class="col-md-4">
                         <div class="ie-summary-card is-expense">
                             <div class="ico"><i class="bx bx-trending-down"></i></div>

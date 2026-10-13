@@ -429,6 +429,8 @@ Route::middleware(['auth', EnsureInstituteActive::class, 'password.changed'])
             ->name('settings.google.update');
         Route::post('/settings/google/disconnect', [SettingsController::class, 'disconnectGoogle'])
             ->name('settings.google.disconnect');
+        Route::post('/settings/website', [SettingsController::class, 'updateWebsite'])
+            ->name('settings.website.update');
 
         Route::get('/google-calendar', [GoogleCalendarController::class, 'index'])
             ->name('google-calendar.index');

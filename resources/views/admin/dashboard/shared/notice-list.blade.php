@@ -10,6 +10,9 @@
             <span class="ivd-list__meta">
                 For {{ \App\Models\Notice::AUDIENCES[$notice->audience] ?? \Illuminate\Support\Str::headline((string) $notice->audience) }}
             </span>
+            @if ($notice->body)
+                <span class="ivd-list__meta">{{ \Illuminate\Support\Str::limit($notice->body, 100) }}</span>
+            @endif
         </div>
         @if ($notice->notice_date?->isToday())
             <div class="ivd-list__end"><span class="ivd-pill ivd-tone-success">New</span></div>

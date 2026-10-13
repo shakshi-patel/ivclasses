@@ -347,7 +347,11 @@ class RoleTemplateService
                 'gst_invoice.add',
                 'income_expense.view',
                 'income_expense.add',
-                'income_expense.edit',
+                'income_expense.show_total_income',
+                'income_expense_category.view',
+                'income_expense_category.add',
+                'income_expense_category.edit',
+                'income_expense_category.status',
                 'student.view',
             ],
             'receptionist' => [

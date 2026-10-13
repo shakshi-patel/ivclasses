@@ -374,7 +374,8 @@
                 @endif
 
                 @if ($tab === 'website')
-                    <form action="#" method="POST" onsubmit="return false;">
+                    <form method="POST" action="{{ route('admin.settings.website.update') }}" enctype="multipart/form-data">
+                        @csrf
                         <div class="payment-gateway-card">
                             <div class="payment-gateway-head">
                                 <h6 class="gw-title">
@@ -386,10 +387,10 @@
                                     <div class="col-md-6">
                                         <label class="form-label">Header logo</label>
                                         <div class="d-flex align-items-center gap-3 flex-wrap">
-                                            <img src="{{ asset('admin-assets/img/logo.png') }}" alt="Header logo"
-                                                class="ws-logo-preview">
+                                            <img src="{{ $settings->get('website.logo_header') ? asset('storage/'.$settings->get('website.logo_header')) : asset('admin-assets/img/logo.png') }}"
+                                                alt="Header logo" class="ws-logo-preview">
                                             <div class="flex-grow-1" style="min-width: 180px;">
-                                                <input type="file" class="form-control" accept="image/*">
+                                                <input type="file" class="form-control" name="header_logo" accept="image/*">
                                                 <div class="form-text mb-0">PNG or SVG recommended.</div>
                                             </div>
                                         </div>
@@ -397,10 +398,10 @@
                                     <div class="col-md-6">
                                         <label class="form-label">Footer logo</label>
                                         <div class="d-flex align-items-center gap-3 flex-wrap">
-                                            <img src="{{ asset('admin-assets/img/logo.png') }}" alt="Footer logo"
-                                                class="ws-logo-preview">
+                                            <img src="{{ $settings->get('website.logo_footer') ? asset('storage/'.$settings->get('website.logo_footer')) : asset('admin-assets/img/logo.png') }}"
+                                                alt="Footer logo" class="ws-logo-preview">
                                             <div class="flex-grow-1" style="min-width: 180px;">
-                                                <input type="file" class="form-control" accept="image/*">
+                                                <input type="file" class="form-control" name="footer_logo" accept="image/*">
                                                 <div class="form-text mb-0">PNG or SVG recommended.</div>
                                             </div>
                                         </div>
@@ -419,13 +420,14 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label class="form-label">Contact email</label>
-                                        <input type="email" class="form-control" value="hello@ivclasses.com"
+                                        <input type="email" class="form-control" name="contact_email"
+                                            value="{{ old('contact_email', $settings->get('website.contact_email', 'hello@ivclasses.com')) }}"
                                             placeholder="hello@example.com">
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Address</label>
-                                        <input type="text" class="form-control"
-                                            value="123 Education Lane, Ahmedabad, Gujarat 380001"
+                                        <input type="text" class="form-control" name="address"
+                                            value="{{ old('address', $settings->get('website.address', '123 Education Lane, Ahmedabad, Gujarat 380001')) }}"
                                             placeholder="Full address">
                                     </div>
                                 </div>
@@ -442,14 +444,14 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label class="form-label">Meta title</label>
-                                        <input type="text" class="form-control"
-                                            value="IV Classes — Smart Classroom Management"
+                                        <input type="text" class="form-control" name="meta_title"
+                                            value="{{ old('meta_title', $settings->get('website.meta_title', 'IV Classes — Smart Classroom Management')) }}"
                                             placeholder="Page title for search engines">
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Meta description</label>
-                                        <textarea class="form-control" rows="2"
-                                            placeholder="Short description for search engines">Manage classes, fees, attendance and more with IV Classes.</textarea>
+                                        <textarea class="form-control" name="meta_description" rows="2"
+                                            placeholder="Short description for search engines">{{ old('meta_description', $settings->get('website.meta_description', 'Manage classes, fees, attendance and more with IV Classes.')) }}</textarea>
                                     </div>
                                 </div>
                             </div>
@@ -465,8 +467,8 @@
                                 <div class="row g-3">
                                     <div class="col-12">
                                         <label class="form-label">Footer description</label>
-                                        <textarea class="form-control" rows="3"
-                                            placeholder="Short about text shown in the website footer">IV Classes helps coaching institutes run demos, batches, fees and day-to-day operations from one place.</textarea>
+                                        <textarea class="form-control" name="footer_description" rows="3"
+                                            placeholder="Short about text shown in the website footer">{{ old('footer_description', $settings->get('website.footer_description', 'IV Classes helps coaching institutes run demos, batches, fees and day-to-day operations from one place.')) }}</textarea>
                                     </div>
                                 </div>
                             </div>
@@ -481,19 +483,20 @@
                             <div class="payment-gateway-body">
                                 <div class="row g-3">
                                     @foreach ([
-                                        ['Facebook', 'bxl-facebook', 'https://facebook.com/ivclasses', 'https://facebook.com/...'],
-                                        ['Instagram', 'bxl-instagram', 'https://instagram.com/ivclasses', 'https://instagram.com/...'],
-                                        ['Twitter / X', 'bxl-twitter', 'https://x.com/ivclasses', 'https://x.com/...'],
-                                        ['LinkedIn', 'bxl-linkedin', 'https://linkedin.com/company/ivclasses', 'https://linkedin.com/...'],
-                                        ['YouTube', 'bxl-youtube', 'https://youtube.com/@ivclasses', 'https://youtube.com/...'],
-                                        ['WhatsApp', 'bxl-whatsapp', 'https://wa.me/919876543210', 'https://wa.me/91...'],
+                                        ['Facebook', 'bxl-facebook', 'facebook', 'https://facebook.com/ivclasses', 'https://facebook.com/...'],
+                                        ['Instagram', 'bxl-instagram', 'instagram', 'https://instagram.com/ivclasses', 'https://instagram.com/...'],
+                                        ['Twitter / X', 'bxl-twitter', 'twitter', 'https://x.com/ivclasses', 'https://x.com/...'],
+                                        ['LinkedIn', 'bxl-linkedin', 'linkedin', 'https://linkedin.com/company/ivclasses', 'https://linkedin.com/...'],
+                                        ['YouTube', 'bxl-youtube', 'youtube', 'https://youtube.com/@ivclasses', 'https://youtube.com/...'],
+                                        ['WhatsApp', 'bxl-whatsapp', 'whatsapp', 'https://wa.me/919876543210', 'https://wa.me/91...'],
                                     ] as $i => $row)
                                         <div class="col-md-6">
                                             <label class="form-label">{{ $row[0] }}</label>
                                             <div class="input-group">
                                                 <span class="input-group-text"><i class="bx {{ $row[1] }}"></i></span>
-                                                <input type="text" class="form-control" value="{{ $row[2] }}"
-                                                    placeholder="{{ $row[3] }}">
+                                                <input type="text" class="form-control" name="social_{{ $row[2] }}"
+                                                    value="{{ old('social_'.$row[2], $settings->get('website.social.'.$row[2], $row[3])) }}"
+                                                    placeholder="{{ $row[4] }}">
                                             </div>
                                         </div>
                                     @endforeach
@@ -502,7 +505,7 @@
                         </div>
 
                         <div class="d-flex justify-content-end mt-3">
-                            <button type="button" class="btn px-4 admin-btn-primary">
+                            <button type="submit" class="btn px-4 admin-btn-primary">
                                 Save website settings
                             </button>
                         </div>

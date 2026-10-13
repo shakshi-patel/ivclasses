@@ -6,7 +6,7 @@
             <div class="demo-layout">
                 <aside class="demo-pitch reveal" data-reveal>
                     <p class="eyebrow">Book a free demo</p>
-                    <h1>See IVClasses live on your institute workflow</h1>
+                    <h1>See {{ config('brand.name') }} live on your institute workflow</h1>
                     <p class="sub">
                         In 20–30 minutes we’ll walk through admissions, fees, attendance, exams and the parent app —
                         so you can decide with clarity.
@@ -83,7 +83,7 @@
                                 <div class="field">
                                     <label for="phone">Phone / WhatsApp *</label>
                                     <input type="tel" id="phone" name="contact_no" value="{{ old('contact_no') }}"
-                                        required autocomplete="tel" maxlength="15" placeholder="+91" />
+                                        required autocomplete="tel" maxlength="15" inputmode="numeric" data-phone-input placeholder="+91" />
                                     <span class="error" data-error="contact_no">{{ $errors->first('contact_no') }}</span>
                                 </div>
                                 <div class="field">

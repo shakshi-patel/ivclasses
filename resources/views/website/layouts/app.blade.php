@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>IVClasses — Coaching Institute CRM & Mobile App</title>
+    <title>{{ config('brand.name') }} — Coaching Institute CRM & Mobile App</title>
     <meta name="description"
         content="All-in-one class management CRM for coaching institutes — Web CRM + Mobile App. Book a free demo." />
         <!-- Favicon -->
@@ -22,10 +22,17 @@
 </head>
 
 <body>
+    @php
+        $websiteSettings = app(\App\Services\AppSettingsService::class);
+        $headerLogoPath = $websiteSettings->get('website.logo_header');
+        $footerLogoPath = $websiteSettings->get('website.logo_footer');
+        $headerLogoUrl = $headerLogoPath ? asset('storage/'.$headerLogoPath) : asset('website-assets/images/logo.png');
+        $footerLogoUrl = $footerLogoPath ? asset('storage/'.$footerLogoPath) : asset('website-assets/images/logo.png');
+    @endphp
     <header class="navbar" id="navbar">
         <div class="container nav-inner">
-            <a href="{{ route('home') }}" class="logo"><img src="{{ asset('website-assets/images/logo.png') }}"
-                    alt="IVClasses" class="logo-img" /></a>
+            <a href="{{ route('home') }}" class="logo"><img src="{{ $headerLogoUrl }}"
+                    alt="{{ config('brand.name') }}" class="logo-img" /></a>
             <nav class="nav-links" aria-label="Primary">
                 <a href="{{ route('home') }}" class="active">Home</a>
                 <a href="{{ route('about') }}">About</a>
@@ -66,8 +73,8 @@
     <footer class="footer">
         <div class="container footer-grid">
             <div class="footer-brand">
-                <a href="{{ route('home') }}" class="logo"><img src="{{ asset('website-assets/images/logo.png') }}"
-                        alt="IVClasses" class="logo-img" /></a>
+                <a href="{{ route('home') }}" class="logo"><img src="{{ $footerLogoUrl }}"
+                        alt="{{ config('brand.name') }}" class="logo-img" /></a>
                 <p>All-in-one class management CRM for coaching institutes — Web CRM + Mobile App.</p>
             </div>
             <div class="footer-col">
@@ -91,10 +98,11 @@
             </div>
         </div>
         <div class="container footer-bottom">
-            <p>&copy; <span data-year></span> IVClasses. All rights reserved.</p>
+            <p>&copy; <span data-year></span> {{ config('brand.name') }}. All rights reserved.</p>
         </div>
     </footer>
     <script src="{{ asset('website-assets/js/main.js') }}"></script>
+    <script src="{{ asset('website-assets/js/phone-input-guard.js') }}"></script>
     @stack('scripts')
 </body>
 

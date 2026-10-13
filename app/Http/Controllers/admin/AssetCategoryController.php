@@ -20,7 +20,7 @@ class AssetCategoryController extends AdminController
 
     public function index(Request $request): View
     {
-        $this->ensureCan('inventory.view');
+        $this->ensureCan('assets_category.view');
 
         $filters = $this->listFilterVars($request, []);
         $instituteId = $this->filterInstituteId($request);
@@ -53,7 +53,7 @@ class AssetCategoryController extends AdminController
 
     public function store(Request $request): JsonResponse
     {
-        $this->ensureCan('inventory.add');
+        $this->ensureCan('assets_category.add');
 
         $validated = $this->validateCategory($request);
         $validated['created_by'] = auth()->id();
@@ -66,7 +66,7 @@ class AssetCategoryController extends AdminController
 
     public function update(Request $request, AssetCategory $assetCategory): JsonResponse
     {
-        $this->ensureCan('inventory.edit');
+        $this->ensureCan('assets_category.edit');
         $this->assertVisible($assetCategory);
 
         $validated = $this->validateCategory($request, $assetCategory);
@@ -78,7 +78,7 @@ class AssetCategoryController extends AdminController
 
     public function destroy(Request $request, AssetCategory $assetCategory): JsonResponse|RedirectResponse
     {
-        $this->ensureCan('inventory.delete');
+        $this->ensureCan('assets_category.delete');
         $this->assertVisible($assetCategory);
 
         if ($assetCategory->assets()->exists()) {
@@ -92,7 +92,7 @@ class AssetCategoryController extends AdminController
 
     public function toggleStatus(AssetCategory $assetCategory): JsonResponse
     {
-        $this->ensureCan('inventory.edit');
+        $this->ensureCan('assets_category.status');
         $this->assertVisible($assetCategory);
 
         $assetCategory->update([

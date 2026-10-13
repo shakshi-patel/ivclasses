@@ -7,7 +7,7 @@
             </a>
         </li>
     @endcan
-    @canany(['batch.view', 'subject.view', 'standard.view', 'income_expense.view', 'inventory.view'])
+    @canany(['batch.view', 'subject.view', 'standard.view', 'income_expense_category.view', 'assets_category.view'])
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Master</span>
         </li>
@@ -40,7 +40,7 @@
                     </li>
                 @endcan
                
-                @can('income_expense.view')
+                @can('income_expense_category.view')
                     <li
                         class="menu-item {{ request()->routeIs('admin.master.income_expense') ? 'active' : '' }}">
                         <a href="{{ route('admin.master.income_expense') }}" class="menu-link">
@@ -48,7 +48,7 @@
                         </a>
                     </li>
                 @endcan
-                @can('inventory.view')
+                @can('assets_category.view')
                     <li
                         class="menu-item {{ request()->routeIs('admin.master.assets_category') ? 'active' : '' }}">
                         <a href="{{ route('admin.master.assets_category') }}" class="menu-link">

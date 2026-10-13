@@ -107,7 +107,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Father Phone <span class="req">*</span></label>
-                                        <input type="text" class="form-control" name="father_phone" required maxlength="15" inputmode="numeric" value="{{ old('father_phone', $student?->parent?->phone) }}">
+                                        <input type="text" class="form-control" name="father_phone" required maxlength="15" inputmode="numeric" data-phone-input value="{{ old('father_phone', $student?->parent?->phone) }}">
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Parent Password</label>

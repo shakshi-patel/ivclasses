@@ -74,7 +74,9 @@ class IncomeExpenseController extends AdminController
             ? IeCategory::query()->where('institute_id', $instituteId)->where('status', 'active')->orderBy('type')->orderBy('sort_order')->orderBy('name')->get()
             : collect();
 
-        return view('admin.income_expense.income_expense', array_merge($filters, compact('entries', 'totals', 'categories')));
+        $canShowTotalIncome = auth()->user()?->isPlatformUser() || auth()->user()?->can('income_expense.show_total_income');
+
+        return view('admin.income_expense.income_expense', array_merge($filters, compact('entries', 'totals', 'categories', 'canShowTotalIncome')));
     }
 
     public function store(Request $request): JsonResponse

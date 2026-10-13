@@ -11,7 +11,7 @@
             <div class="admin-main-card-inner">
                 <div class="d-flex justify-content-between gap-3 flex-wrap">
                     <h4 class="admin-page-title"><i class="bx bx-category"></i> Assets Category</h4>
-                    @if (auth()->user()?->isPlatformUser() || auth()->user()?->can('inventory.add'))
+                    @if (auth()->user()?->isPlatformUser() || auth()->user()?->can('assets_category.add'))
                         <button type="button" class="btn admin-btn-primary" id="btnAddAssetCat">
                             <i class="bx bx-plus me-1"></i> Create
                         </button>
@@ -62,12 +62,14 @@
                                             </span>
                                         </td>
                                         <td class="text-center">
-                                            @if (auth()->user()?->isPlatformUser() || auth()->user()?->can('inventory.edit'))
+                                            @if (auth()->user()?->isPlatformUser() || auth()->user()?->can('assets_category.edit'))
                                                 <button type="button" class="admin-action-icon btn-edit-asset-cat" title="Edit"
                                                     data-id="{{ $row->id }}"
                                                     data-institute-id="{{ $row->institute_id }}"
                                                     data-name="{{ $row->name }}"
                                                     data-status="{{ $row->status }}"><i class="bx bx-pencil"></i></button>
+                                            @endif
+                                            @if (auth()->user()?->isPlatformUser() || auth()->user()?->can('assets_category.status'))
                                                 <button type="button" class="admin-action-icon btn-toggle-asset-cat"
                                                     title="{{ $row->status === 'active' ? 'Deactivate' : 'Activate' }}"
                                                     data-id="{{ $row->id }}"
@@ -75,7 +77,7 @@
                                                     <i class="bx {{ $row->status === 'active' ? 'bx-user-x' : 'bx-user-check' }}"></i>
                                                 </button>
                                             @endif
-                                            @if (auth()->user()?->isPlatformUser() || auth()->user()?->can('inventory.delete'))
+                                            @if (auth()->user()?->isPlatformUser() || auth()->user()?->can('assets_category.delete'))
                                                 <button type="button" class="admin-action-icon btn-delete-asset-cat" title="Delete"
                                                     data-id="{{ $row->id }}"><i class="bx bx-trash"></i></button>
                                             @endif

@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Models\Batch;
+use App\Models\LeaveRequest;
 use App\Models\StudentAttendance;
 use App\Models\StudentBatch;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -143,11 +145,18 @@ class StudentAttendanceService
             ->get();
 
         $byDay = $records->keyBy(fn (StudentAttendance $a) => (int) $a->attendance_date->format('j'));
+        $leaveDays = $this->monthLeaveDays($studentId, $start, $end);
 
         $days = [];
         for ($d = 1; $d <= $daysInMonth; $d++) {
             if (isset($holidayDays[$d])) {
                 $days[$d] = 'is-holiday';
+
+                continue;
+            }
+
+            if (isset($leaveDays[$d])) {
+                $days[$d] = 'is-leave';
 
                 continue;
             }
@@ -167,6 +176,7 @@ class StudentAttendanceService
                 'present' => $records->where('status', StudentAttendance::STATUS_PRESENT)->count(),
                 'absent' => $records->where('status', StudentAttendance::STATUS_ABSENT)->count(),
                 'late' => $records->where('status', StudentAttendance::STATUS_LATE)->count(),
+                'leave' => count($leaveDays),
                 'total_marked' => $records->count(),
             ],
         ];
@@ -201,20 +211,33 @@ class StudentAttendanceService
             ->get()
             ->groupBy('student_id');
 
-        $students = $enrollments->map(function (StudentBatch $enrollment) use ($attendances, $daysInMonth) {
+        $leaveDaysByStudent = $this->monthLeaveDaysForStudents(
+            $enrollments->pluck('student_id')->all(),
+            $start,
+            $end
+        );
+
+        $students = $enrollments->map(function (StudentBatch $enrollment) use ($attendances, $daysInMonth, $holidayDays, $leaveDaysByStudent) {
             $studentAtt = $attendances->get($enrollment->student_id, collect());
             $byDay = $studentAtt->keyBy(fn (StudentAttendance $a) => (int) $a->attendance_date->format('j'));
+            $leaveDays = $leaveDaysByStudent->get($enrollment->student_id, []);
 
             $days = [];
             for ($d = 1; $d <= $daysInMonth; $d++) {
-                $rec = $byDay->get($d);
-                if ($rec) {
-                    $days[$d] = $this->statusToReportBadge($rec->status);
-                } elseif (isset($holidayDays[$d])) {
+                if (isset($holidayDays[$d])) {
                     $days[$d] = ['class' => 'is-h', 'label' => 'H'];
-                } else {
-                    $days[$d] = null;
+
+                    continue;
                 }
+
+                if (isset($leaveDays[$d])) {
+                    $days[$d] = ['class' => 'is-lv', 'label' => 'LV'];
+
+                    continue;
+                }
+
+                $rec = $byDay->get($d);
+                $days[$d] = $rec ? $this->statusToReportBadge($rec->status) : null;
             }
 
             return [
@@ -253,6 +276,65 @@ class StudentAttendanceService
         }
 
         return [$start, $end, $daysInMonth, $sundays];
+    }
+
+    /**
+     * @return array<int, true> day-of-month => true, for approved leaves covering this student in [start, end]
+     */
+    protected function monthLeaveDays(int $studentId, string $start, string $end): array
+    {
+        $leaves = LeaveRequest::query()
+            ->where('requester_type', LeaveRequest::TYPE_STUDENT)
+            ->where('student_id', $studentId)
+            ->where('status', LeaveRequest::STATUS_APPROVED)
+            ->where('from_date', '<=', $end)
+            ->where('to_date', '>=', $start)
+            ->get(['from_date', 'to_date']);
+
+        return $this->expandLeaveDays($leaves, $start, $end);
+    }
+
+    /**
+     * @param  array<int, int>  $studentIds
+     * @return Collection<int, array<int, true>> student_id => [day => true]
+     */
+    protected function monthLeaveDaysForStudents(array $studentIds, string $start, string $end): Collection
+    {
+        if ($studentIds === []) {
+            return collect();
+        }
+
+        return LeaveRequest::query()
+            ->where('requester_type', LeaveRequest::TYPE_STUDENT)
+            ->whereIn('student_id', $studentIds)
+            ->where('status', LeaveRequest::STATUS_APPROVED)
+            ->where('from_date', '<=', $end)
+            ->where('to_date', '>=', $start)
+            ->get(['student_id', 'from_date', 'to_date'])
+            ->groupBy('student_id')
+            ->map(fn (Collection $leaves) => $this->expandLeaveDays($leaves, $start, $end));
+    }
+
+    /**
+     * @param  Collection<int, LeaveRequest>  $leaves
+     * @return array<int, true>
+     */
+    protected function expandLeaveDays(Collection $leaves, string $start, string $end): array
+    {
+        $monthStart = Carbon::parse($start);
+        $monthEnd = Carbon::parse($end);
+        $days = [];
+
+        foreach ($leaves as $leave) {
+            $from = $leave->from_date->greaterThan($monthStart) ? $leave->from_date : $monthStart;
+            $to = $leave->to_date->lessThan($monthEnd) ? $leave->to_date : $monthEnd;
+
+            for ($cursor = $from->copy(); $cursor->lessThanOrEqualTo($to); $cursor->addDay()) {
+                $days[(int) $cursor->format('j')] = true;
+            }
+        }
+
+        return $days;
     }
 
     protected function statusToCalendarClass(string $status): string

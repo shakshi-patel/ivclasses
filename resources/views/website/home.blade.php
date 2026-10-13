@@ -15,7 +15,7 @@
                         <span class="kicker-dot"></span>
                         Web CRM + Mobile App for coaching classes
                     </p>
-                    <p class="brand-hero reveal" data-reveal data-delay="40">IVClasses</p>
+                    <p class="brand-hero reveal" data-reveal data-delay="40">{{ config('brand.name') }}</p>
                     <h1 class="reveal" data-reveal data-delay="100">
                         Run your institute like a modern business — not WhatsApp &amp; Excel.
                     </h1>
@@ -40,7 +40,7 @@
                     <div class="visual-ring" aria-hidden="true"></div>
                     <div class="hero-image-card" data-parallax="0.03">
                         <img src="{{ asset('website-assets/images/hero-ivclasses.png') }}"
-                            alt="IVClasses Web CRM and mobile app for coaching institutes"
+                            alt="{{ config('brand.name') }} Web CRM and mobile app for coaching institutes"
                             class="hero-main-image" />
                     </div>
                 </div>
@@ -52,7 +52,7 @@
             <div class="container">
                 <div class="section-head center reveal" data-reveal>
                     <p class="eyebrow">Built for real institute teams</p>
-                    <h2 class="section-title">Who uses IVClasses?</h2>
+                    <h2 class="section-title">Who uses {{ config('brand.name') }}?</h2>
                     <p class="section-sub">
                         Every role gets the right access — so owners stay in control, teachers teach,
                         staff operate, and parents stay informed without calling the office.
@@ -63,7 +63,7 @@
                     <article class="role-card reveal" data-reveal data-role="superadmin">
                         <div class="role-image-wrap">
                             <img src="{{ asset('website-assets/images/role-superadmin.png') }}"
-                                alt="Superadmin managing institutes on IVClasses" />
+                                alt="Superadmin managing institutes on {{ config('brand.name') }}" />
                         </div>
                         <div class="role-card-body">
                             <div class="role-card-top"><span class="role-num">01</span></div>
@@ -137,10 +137,10 @@
                     <article class="compare-row compare-row-before reveal" data-reveal>
                         <div class="compare-row-media">
                             <img src="{{ asset('website-assets/images/before-ivclasses.png') }}"
-                                alt="Before IVClasses — Excel WhatsApp and paper chaos" />
+                                alt="Before {{ config('brand.name') }} — Excel WhatsApp and paper chaos" />
                         </div>
                         <div class="compare-row-copy">
-                            <span class="compare-badge">Before IVClasses</span>
+                            <span class="compare-badge">Before {{ config('brand.name') }}</span>
                             <h3>Manual work slows your institute</h3>
                             <p>Manage everything across WhatsApp, Excel and notebooks.</p>
                             <ul class="check-list muted-list">
@@ -155,7 +155,7 @@
 
                     <article class="compare-row compare-row-after reveal" data-reveal data-delay="80">
                         <div class="compare-row-copy">
-                            <span class="compare-badge compare-badge-good">With IVClasses</span>
+                            <span class="compare-badge compare-badge-good">With {{ config('brand.name') }}</span>
                             <h3>Run your institute from one platform</h3>
                             <p>One platform for your Classes, Branches, Teachers, Staff and Parents.</p>
                             <ul class="check-list">
@@ -170,7 +170,7 @@
                         </div>
                         <div class="compare-row-media">
                             <img src="{{ asset('website-assets/images/after-ivclasses.png') }}"
-                                alt="After IVClasses — organized live CRM dashboard" />
+                                alt="After {{ config('brand.name') }} — organized live CRM dashboard" />
                         </div>
                     </article>
                 </div>
@@ -182,7 +182,7 @@
             <div class="container">
                 <div class="section-head center reveal" data-reveal>
                     <p class="eyebrow">Product modules</p>
-                    <h2 class="section-title">What makes institutes choose IVClasses</h2>
+                    <h2 class="section-title">What makes institutes choose {{ config('brand.name') }}</h2>
                     <p class="section-sub">
                         Four core systems that run the institute — with supporting modules that keep daily ops complete.
                     </p>
@@ -193,7 +193,7 @@
                     <div class="feature-story reveal" data-reveal>
                         <div class="feature-media">
                             <img src="{{ asset('website-assets/images/module-attendance.png') }}"
-                                alt="Student and staff attendance dashboard in IVClasses" />
+                                alt="Student and staff attendance dashboard in {{ config('brand.name') }}" />
                         </div>
                         <div class="feature-copy">
                             <div class="feature-badge"><span class="feature-icon">✓</span> Main module</div>
@@ -239,7 +239,7 @@
                     <div class="feature-story reverse reveal" data-reveal>
                         <div class="feature-media">
                             <img src="{{ asset('website-assets/images/module-exams-results.png') }}"
-                                alt="Exam schedule and result announcement in IVClasses" />
+                                alt="Exam schedule and result announcement in {{ config('brand.name') }}" />
                         </div>
                         <div class="feature-copy">
                             <div class="feature-badge"><span class="feature-icon">🏆</span> Main module</div>
@@ -284,7 +284,7 @@
                     <div class="feature-story reveal" data-reveal>
                         <div class="feature-media">
                             <img src="{{ asset('website-assets/images/module-income-expense.png') }}"
-                                alt="Income and expense finance dashboard in IVClasses" />
+                                alt="Income and expense finance dashboard in {{ config('brand.name') }}" />
                         </div>
                         <div class="feature-copy">
                             <div class="feature-badge"><span class="feature-icon">₹</span> Main module</div>
@@ -325,7 +325,7 @@
                     <div class="feature-story reverse reveal" data-reveal>
                         <div class="feature-media">
                             <img src="{{ asset('website-assets/images/module-inventory-assets.png') }}"
-                                alt="Inventory and assets tracking in IVClasses" />
+                                alt="Inventory and assets tracking in {{ config('brand.name') }}" />
                         </div>
                         <div class="feature-copy">
                             <div class="feature-badge"><span class="feature-icon">📦</span> Main module</div>

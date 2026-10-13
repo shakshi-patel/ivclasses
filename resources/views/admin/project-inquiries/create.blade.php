@@ -58,7 +58,7 @@
                         <div class="col-md-6">
                             <label class="form-label fw-semibold" style="color: var(--iv-primary);">Phone / WhatsApp *</label>
                             <input type="text" name="contact_no" class="form-control" value="{{ old('contact_no') }}"
-                                maxlength="15" required>
+                                maxlength="15" inputmode="numeric" data-phone-input required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold" style="color: var(--iv-primary);">Email *</label>

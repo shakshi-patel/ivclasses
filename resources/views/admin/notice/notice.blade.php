@@ -55,6 +55,7 @@
                                 <tr>
                                     <th style="width: 70px;">Sr.</th>
                                     <th>Title</th>
+                                    @if (!empty($isParentView))<th>Description</th>@endif
                                     <th>Date</th>
                                     @if (empty($isParentView))<th>Status</th>@endif
                                     <th class="text-center" style="width: 160px;">Action</th>
@@ -68,7 +69,10 @@
                                             <div class="fw-semibold">{{ $notice->title }}</div>
                                             <div class="text-muted small">{{ $notice->scopeLabel() }}</div>
                                         </td>
-                                        <td>{{ $notice->notice_date?->format('d M Y') }}</td>
+                                        @if (!empty($isParentView))
+                                            <td class="notice-description-cell">{{ $notice->body ?: '—' }}</td>
+                                        @endif
+                                        <td class="notice-date-cell">{{ $notice->notice_date?->format('d M Y') ?: '—' }}</td>
                                         @if (empty($isParentView))
                                             <td>
                                                 <span class="admin-status-pill {{ $notice->isActive() ? 'is-active' : 'is-muted' }}" data-role="status-pill">
@@ -109,7 +113,7 @@
                                         </td>
                                     </tr>
                                 @empty
-                                    <tr><td colspan="{{ empty($isParentView) ? 5 : 4 }}" class="text-center text-muted py-4">No notices yet.</td></tr>
+                                    <tr><td colspan="5" class="text-center text-muted py-4">No notices yet.</td></tr>
                                 @endforelse
                             </tbody>
                         </table>

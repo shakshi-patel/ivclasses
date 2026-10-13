@@ -158,6 +158,7 @@
                                         <span><i class="master-att-dot is-present"></i> Present</span>
                                         <span><i class="master-att-dot is-absent"></i> Absent</span>
                                         <span><i class="master-att-dot is-late"></i> Late</span>
+                                        <span><i class="master-att-dot is-leave"></i> Leave</span>
                                         <span><span class="master-att-badge is-h">H</span> Holiday</span>
                                     </div>
                                 </div>

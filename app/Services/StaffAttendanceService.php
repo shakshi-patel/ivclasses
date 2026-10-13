@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\LeaveRequest;
 use App\Models\Staff;
 use App\Models\StaffAttendance;
 use App\Models\Teacher;
@@ -133,11 +134,18 @@ class StaffAttendanceService
             ->get();
 
         $byDay = $records->keyBy(fn (StaffAttendance $a) => (int) $a->attendance_date->format('j'));
+        $leaveDays = $this->monthLeaveDays($userId, $start->toDateString(), $end->toDateString());
 
         $days = [];
         for ($d = 1; $d <= $daysInMonth; $d++) {
             if (isset($holidayDays[$d])) {
                 $days[$d] = 'is-holiday';
+
+                continue;
+            }
+
+            if (isset($leaveDays[$d])) {
+                $days[$d] = 'is-leave';
 
                 continue;
             }
@@ -156,6 +164,7 @@ class StaffAttendanceService
                 'present' => $records->where('status', StaffAttendance::STATUS_PRESENT)->count(),
                 'absent' => $records->where('status', StaffAttendance::STATUS_ABSENT)->count(),
                 'late' => $records->where('status', StaffAttendance::STATUS_LATE)->count(),
+                'leave' => count($leaveDays),
                 'total_marked' => $records->count(),
             ],
         ];
@@ -169,6 +178,35 @@ class StaffAttendanceService
             StaffAttendance::STATUS_LATE => 'is-late',
             default => '',
         };
+    }
+
+    /**
+     * @return array<int, true> day-of-month => true, for approved leaves covering this user in [start, end]
+     */
+    protected function monthLeaveDays(int $userId, string $start, string $end): array
+    {
+        $leaves = LeaveRequest::query()
+            ->where('requester_type', LeaveRequest::TYPE_STAFF)
+            ->where('requester_user_id', $userId)
+            ->where('status', LeaveRequest::STATUS_APPROVED)
+            ->where('from_date', '<=', $end)
+            ->where('to_date', '>=', $start)
+            ->get(['from_date', 'to_date']);
+
+        $monthStart = Carbon::parse($start);
+        $monthEnd = Carbon::parse($end);
+        $days = [];
+
+        foreach ($leaves as $leave) {
+            $from = $leave->from_date->greaterThan($monthStart) ? $leave->from_date : $monthStart;
+            $to = $leave->to_date->lessThan($monthEnd) ? $leave->to_date : $monthEnd;
+
+            for ($cursor = $from->copy(); $cursor->lessThanOrEqualTo($to); $cursor->addDay()) {
+                $days[(int) $cursor->format('j')] = true;
+            }
+        }
+
+        return $days;
     }
 
     /**

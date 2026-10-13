@@ -437,7 +437,7 @@ class ParentDashboardService
             ->orderByDesc('notice_date')
             ->orderByDesc('id')
             ->limit($limit)
-            ->get(['id', 'title', 'notice_date', 'audience']);
+            ->get(['id', 'title', 'body', 'notice_date', 'audience']);
     }
 
     /**

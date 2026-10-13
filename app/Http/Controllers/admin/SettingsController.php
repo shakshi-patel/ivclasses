@@ -155,4 +155,53 @@ class SettingsController extends AdminController implements HasMiddleware
             ->route('admin.settings.index', ['tab' => 'google'])
             ->with('success', 'Google Calendar disconnected.');
     }
+
+    public function updateWebsite(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'contact_email' => ['nullable', 'email', 'max:255'],
+            'address' => ['nullable', 'string', 'max:500'],
+            'meta_title' => ['nullable', 'string', 'max:255'],
+            'meta_description' => ['nullable', 'string', 'max:500'],
+            'footer_description' => ['nullable', 'string', 'max:1000'],
+            'social_facebook' => ['nullable', 'url', 'max:255'],
+            'social_instagram' => ['nullable', 'url', 'max:255'],
+            'social_twitter' => ['nullable', 'url', 'max:255'],
+            'social_linkedin' => ['nullable', 'url', 'max:255'],
+            'social_youtube' => ['nullable', 'url', 'max:255'],
+            'social_whatsapp' => ['nullable', 'url', 'max:255'],
+            'header_logo' => ['nullable', 'image', 'max:2048'],
+            'footer_logo' => ['nullable', 'image', 'max:2048'],
+        ]);
+
+        $this->settings->put([
+            'website.contact_email' => $validated['contact_email'] ?? '',
+            'website.address' => $validated['address'] ?? '',
+            'website.meta_title' => $validated['meta_title'] ?? '',
+            'website.meta_description' => $validated['meta_description'] ?? '',
+            'website.footer_description' => $validated['footer_description'] ?? '',
+            'website.social.facebook' => $validated['social_facebook'] ?? '',
+            'website.social.instagram' => $validated['social_instagram'] ?? '',
+            'website.social.twitter' => $validated['social_twitter'] ?? '',
+            'website.social.linkedin' => $validated['social_linkedin'] ?? '',
+            'website.social.youtube' => $validated['social_youtube'] ?? '',
+            'website.social.whatsapp' => $validated['social_whatsapp'] ?? '',
+        ]);
+
+        if ($request->hasFile('header_logo')) {
+            $this->settings->put([
+                'website.logo_header' => $request->file('header_logo')->store('website', 'public'),
+            ]);
+        }
+
+        if ($request->hasFile('footer_logo')) {
+            $this->settings->put([
+                'website.logo_footer' => $request->file('footer_logo')->store('website', 'public'),
+            ]);
+        }
+
+        return redirect()
+            ->route('admin.settings.index', ['tab' => 'website'])
+            ->with('success', 'Website settings saved.');
+    }
 }

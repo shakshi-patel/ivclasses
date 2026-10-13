@@ -55,7 +55,7 @@
             margin-bottom: 12px;
         }
         .stats td {
-            width: 33.33%;
+            width: 25%;
             padding: 8px 10px;
             text-align: center;
             border: 1px solid #d7e4e0;
@@ -76,6 +76,7 @@
         .stats .is-p .num { color: #2f9e6a; }
         .stats .is-a .num { color: #d64545; }
         .stats .is-lp .num { color: #c48a1a; }
+        .stats .is-lv .num { color: #7c4fc0; }
 
         table.cal {
             width: 100%;
@@ -121,6 +122,7 @@
         .badge.is-p { background: #2f9e6a; }
         .badge.is-a { background: #d64545; }
         .badge.is-lp { background: #e09b2d; color: #2c2208; }
+        .badge.is-lv { background: #9b6bd4; }
         .badge.is-h { background: #5b7fc4; }
         .badge.is-s { background: #7a8584; }
         .dash { color: #b0bec5; font-size: 10px; }
@@ -205,6 +207,9 @@
         if ($cls === 'is-late') {
             return ['class' => 'is-lp', 'label' => 'LP'];
         }
+        if ($cls === 'is-leave') {
+            return ['class' => 'is-lv', 'label' => 'LV'];
+        }
         if ($cls === 'is-holiday' || isset($holidays[$day])) {
             return ['class' => 'is-h', 'label' => 'H'];
         }
@@ -245,6 +250,7 @@
         <td class="is-p"><span class="num">{{ (int) ($summary['present'] ?? 0) }}</span><span class="lbl">Present</span></td>
         <td class="is-a"><span class="num">{{ (int) ($summary['absent'] ?? 0) }}</span><span class="lbl">Absent</span></td>
         <td class="is-lp"><span class="num">{{ (int) ($summary['late'] ?? 0) }}</span><span class="lbl">Late Present</span></td>
+        <td class="is-lv"><span class="num">{{ (int) ($summary['leave'] ?? 0) }}</span><span class="lbl">Leave</span></td>
     </tr>
 </table>
 
@@ -324,6 +330,7 @@
     <span class="legend-item"><span class="badge is-p">P</span> Present</span>
     <span class="legend-item"><span class="badge is-lp">LP</span> Late Present</span>
     <span class="legend-item"><span class="badge is-a">A</span> Absent</span>
+    <span class="legend-item"><span class="badge is-lv">LV</span> Leave</span>
     <span class="legend-item"><span class="badge is-s">S</span> Sunday</span>
     <span class="legend-item"><span class="badge is-h">H</span> Holiday</span>
 </div>

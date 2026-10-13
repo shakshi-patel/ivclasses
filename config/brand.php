@@ -2,7 +2,7 @@
 
 return [
 
-    'name' => env('BRAND_NAME', 'IV Classes'),
+    'name' => env('BRAND_NAME', 'Class Flow'),
 
     'email' => env('BRAND_EMAIL', 'ivinfotech@gmail.com'),
 

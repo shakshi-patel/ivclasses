@@ -14,12 +14,13 @@
         .meta td { vertical-align: top; padding: 2px 0; font-size: 10px; width: 50%; }
         .meta .label { color: #0f5c4d; font-weight: 700; display: inline-block; min-width: 78px; }
         .stats { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
-        .stats td { width: 33.33%; padding: 8px 10px; text-align: center; border: 1px solid #d7e4e0; background: #f4faf8; }
+        .stats td { width: 25%; padding: 8px 10px; text-align: center; border: 1px solid #d7e4e0; background: #f4faf8; }
         .stats .num { display: block; font-size: 16px; font-weight: 800; margin-bottom: 2px; }
         .stats .lbl { font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.04em; color: #5c6b68; }
         .stats .is-p .num { color: #2f9e6a; }
         .stats .is-a .num { color: #d64545; }
         .stats .is-lp .num { color: #c48a1a; }
+        .stats .is-lv .num { color: #7c4fc0; }
         table.cal { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 12px; }
         table.cal th { background: #0f5c4d; color: #fff; font-size: 8.5px; font-weight: 700; padding: 7px 2px; text-align: center; border: 1px solid #0c4a3e; text-transform: uppercase; }
         table.cal td { border: 1px solid #d5e3df; height: 52px; vertical-align: top; padding: 4px; background: #fff; }
@@ -30,6 +31,7 @@
         .badge.is-p { background: #2f9e6a; }
         .badge.is-a { background: #d64545; }
         .badge.is-lp { background: #e09b2d; color: #2c2208; }
+        .badge.is-lv { background: #9b6bd4; }
         .badge.is-h { background: #5b7fc4; }
         .badge.is-s { background: #7a8584; }
         .dash { color: #b0bec5; font-size: 10px; }
@@ -76,6 +78,9 @@
         if ($cls === 'is-late') {
             return ['class' => 'is-lp', 'label' => 'LP'];
         }
+        if ($cls === 'is-leave') {
+            return ['class' => 'is-lv', 'label' => 'LV'];
+        }
         if ($cls === 'is-holiday' || isset($holidays[$day])) {
             return ['class' => 'is-h', 'label' => 'H'];
         }
@@ -112,6 +117,7 @@
         <td class="is-p"><span class="num">{{ (int) ($summary['present'] ?? 0) }}</span><span class="lbl">Present</span></td>
         <td class="is-a"><span class="num">{{ (int) ($summary['absent'] ?? 0) }}</span><span class="lbl">Absent</span></td>
         <td class="is-lp"><span class="num">{{ (int) ($summary['late'] ?? 0) }}</span><span class="lbl">Late</span></td>
+        <td class="is-lv"><span class="num">{{ (int) ($summary['leave'] ?? 0) }}</span><span class="lbl">Leave</span></td>
     </tr>
 </table>
 
@@ -191,6 +197,7 @@
     <span class="legend-item"><span class="badge is-p">P</span> Present</span>
     <span class="legend-item"><span class="badge is-lp">LP</span> Late</span>
     <span class="legend-item"><span class="badge is-a">A</span> Absent</span>
+    <span class="legend-item"><span class="badge is-lv">LV</span> Leave</span>
     <span class="legend-item"><span class="badge is-s">S</span> Sunday</span>
     <span class="legend-item"><span class="badge is-h">H</span> Holiday</span>
 </div>

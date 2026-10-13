@@ -48,6 +48,7 @@
                         <span><span class="master-att-badge is-p">P</span> Present</span>
                         <span><span class="master-att-badge is-a">A</span> Absent</span>
                         <span><span class="master-att-badge is-lp">LP</span> Late</span>
+                        <span><span class="master-att-badge is-lv">LV</span> Leave</span>
                         <span><span class="master-att-badge is-h">H</span> Holiday</span>
                     </div>
 

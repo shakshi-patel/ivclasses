@@ -20,7 +20,7 @@ class IeCategoryController extends AdminController
 
     public function index(Request $request): View
     {
-        $this->ensureCan('income_expense.view');
+        $this->ensureCan('income_expense_category.view');
 
         $filters = $this->listFilterVars($request, []);
         $instituteId = $this->filterInstituteId($request);
@@ -61,7 +61,7 @@ class IeCategoryController extends AdminController
 
     public function store(Request $request): JsonResponse
     {
-        $this->ensureCan('income_expense.add');
+        $this->ensureCan('income_expense_category.add');
 
         $validated = $this->validateCategory($request);
         $validated['created_by'] = auth()->id();
@@ -74,7 +74,7 @@ class IeCategoryController extends AdminController
 
     public function update(Request $request, IeCategory $ieCategory): JsonResponse
     {
-        $this->ensureCan('income_expense.edit');
+        $this->ensureCan('income_expense_category.edit');
         $this->assertVisible($ieCategory);
 
         $validated = $this->validateCategory($request, $ieCategory);
@@ -86,7 +86,7 @@ class IeCategoryController extends AdminController
 
     public function destroy(Request $request, IeCategory $ieCategory): JsonResponse|RedirectResponse
     {
-        $this->ensureCan('income_expense.delete');
+        $this->ensureCan('income_expense_category.delete');
         $this->assertVisible($ieCategory);
 
         if ($ieCategory->entries()->exists()) {
@@ -100,7 +100,7 @@ class IeCategoryController extends AdminController
 
     public function toggleStatus(IeCategory $ieCategory): JsonResponse
     {
-        $this->ensureCan('income_expense.edit');
+        $this->ensureCan('income_expense_category.status');
         $this->assertVisible($ieCategory);
 
         $ieCategory->update([

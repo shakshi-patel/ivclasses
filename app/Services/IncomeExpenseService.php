@@ -159,6 +159,15 @@ class IncomeExpenseService
 
     public function delete(IncomeExpense $entry): void
     {
+        if ($entry->fee_payment_id) {
+            $payment = FeePayment::query()->find($entry->fee_payment_id);
+            if ($payment) {
+                app(FeeService::class)->deletePayment($payment);
+
+                return;
+            }
+        }
+
         $entry->delete();
     }
 

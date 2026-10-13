@@ -8,7 +8,7 @@
         <div class="page-hero-inner center">
           <p class="eyebrow reveal" data-reveal>About us</p>
           <h1 class="reveal" data-reveal data-delay="60">Built for coaching institutes that want clarity</h1>
-          <p class="section-sub reveal" data-reveal data-delay="120">IVClasses is a complete institute management SaaS — admissions, fees, academics and parents on one live system.</p>
+          <p class="section-sub reveal" data-reveal data-delay="120">{{ config('brand.name') }} is a complete institute management SaaS — admissions, fees, academics and parents on one live system.</p>
           <div class="page-hero-meta reveal" data-reveal data-delay="180">
             <span>Web CRM</span>
             <span>Mobile App</span>
@@ -30,7 +30,7 @@
             <h2 class="section-title">A complete institute management SaaS</h2>
           </div>
           <p class="reveal" data-reveal>
-            IVClasses is built for coaching classes and tuition centers that outgrew Excel sheets and WhatsApp groups.
+            {{ config('brand.name') }} is built for coaching classes and tuition centers that outgrew Excel sheets and WhatsApp groups.
             CRM, academics, fees, attendance and staff ops live in one system — via Web CRM and Mobile App.
           </p>
           <p class="reveal" data-reveal>
@@ -57,7 +57,7 @@
       <div class="container">
         <div class="section-head center reveal" data-reveal>
           <p class="eyebrow">How we think</p>
-          <h2 class="section-title">Principles behind IVClasses</h2>
+          <h2 class="section-title">Principles behind {{ config('brand.name') }}</h2>
           <p class="section-sub">Simple rules that keep the product useful for real institutes — not generic software filled with unused menus.</p>
         </div>
         <div class="about-pillars">
@@ -85,7 +85,7 @@
         <div class="section-head center reveal" data-reveal>
           <p class="eyebrow">Audience</p>
           <h2 class="section-title">Who we serve</h2>
-          <p class="section-sub">From a single tuition batch to multi-branch exam centers — IVClasses scales with your setup.</p>
+          <p class="section-sub">From a single tuition batch to multi-branch exam centers — {{ config('brand.name') }} scales with your setup.</p>
         </div>
         <div class="trust-row">
           <div class="trust-item reveal" data-reveal>
@@ -124,7 +124,7 @@
       <div class="container">
         <div class="about-cta-box reveal" data-reveal>
           <div>
-            <h3>See IVClasses on your institute workflow</h3>
+            <h3>See {{ config('brand.name') }} on your institute workflow</h3>
             <p>Book a free 30-minute demo — we walk through admissions, fees and app flow tailored to your size.</p>
           </div>
           <div class="about-cta-actions">
