@@ -73,7 +73,12 @@
                                         <td>{{ $i + 1 }}</td>
                                         <td class="fw-semibold">{{ $row->student_name }}</td>
                                         <td>{{ optional($row->inquiry_date)->format('d M Y') ?? '—' }}</td>
-                                        <td>{{ $row->phone ?: '—' }}</td>
+                                        <td>
+                                            {{ $row->phone ?: '—' }}
+                                            @if ($row->phone_2)
+                                                <div class="text-muted small">{{ $row->phone_2 }}</div>
+                                            @endif
+                                        </td>
                                         <td>
                                             <div class="fw-semibold" style="color: var(--iv-primary-dark); font-size: 0.86rem;">
                                                 Std: {{ $row->standard?->name ?? '—' }}

@@ -99,6 +99,7 @@ class StudentService
                 'mother_name' => $inquiry->mother_name,
                 'father_email' => $inquiry->email,
                 'father_phone' => $inquiry->phone,
+                'father_phone_2' => $inquiry->phone_2,
                 'father_occupation' => $inquiry->father_occupation,
                 'parent_password' => $data['parent_password'] ?? 'password',
                 'photo_path' => $inquiry->photo_path,
@@ -286,6 +287,7 @@ class StudentService
     {
         $email = $data['father_email'] ?? $data['email'] ?? $existing?->email;
         $phone = $data['father_phone'] ?? $data['phone'] ?? $existing?->phone;
+        $phone2 = $data['father_phone_2'] ?? $data['phone_2'] ?? $existing?->phone_2;
 
         $parent = $existing;
 
@@ -309,6 +311,7 @@ class StudentService
             'mother_name' => $data['mother_name'] ?? $existing?->mother_name,
             'email' => $email,
             'phone' => $phone,
+            'phone_2' => $phone2,
             'occupation' => $data['father_occupation'] ?? $existing?->occupation,
             'address' => $data['address'] ?? $existing?->address,
         ];

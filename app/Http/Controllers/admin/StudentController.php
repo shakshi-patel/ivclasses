@@ -295,6 +295,7 @@ class StudentController extends AdminController
             'mother_name' => ['nullable', 'string', 'max:150'],
             'father_email' => ['required', 'email', 'max:150'],
             'father_phone' => ['required', 'string', 'max:15'],
+            'father_phone_2' => ['nullable', 'string', 'max:15'],
             'father_occupation' => ['nullable', 'string', 'max:100'],
             'parent_password' => ['nullable', 'string', 'min:8'],
             'status' => ['nullable', 'in:active,inactive,left,alumni'],

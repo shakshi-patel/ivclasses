@@ -283,6 +283,7 @@ class InquiryController extends AdminController
             'mother_name' => ['nullable', 'string', 'max:150'],
             'father_email' => ['required', 'email', 'max:150'],
             'father_phone' => ['required', 'string', 'max:15'],
+            'father_phone_2' => ['nullable', 'string', 'max:15'],
             'father_occupation' => ['nullable', 'string', 'max:100'],
             'dob' => ['nullable', 'date'],
             'gender' => ['required', 'in:Male,Female,Other,male,female,other'],

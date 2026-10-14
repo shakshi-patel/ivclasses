@@ -106,8 +106,12 @@
                                         <input type="email" class="form-control" name="father_email" required value="{{ old('father_email', $student?->parent?->email) }}">
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label">Father Phone <span class="req">*</span></label>
+                                        <label class="form-label">Contact 1 <span class="req">*</span></label>
                                         <input type="text" class="form-control" name="father_phone" required maxlength="15" inputmode="numeric" data-phone-input value="{{ old('father_phone', $student?->parent?->phone) }}">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Contact 2</label>
+                                        <input type="text" class="form-control" name="father_phone_2" maxlength="15" inputmode="numeric" data-phone-input value="{{ old('father_phone_2', $student?->parent?->phone_2) }}">
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Parent Password</label>

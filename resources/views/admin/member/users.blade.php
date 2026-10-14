@@ -5,36 +5,11 @@
         $authUser = auth()->user();
         $can = fn (string $perm) => $authUser && ($authUser->isPlatformUser() || $authUser->can($perm));
 
-        $addLinks = [];
-        if ($can('teacher.add')) {
-            $addLinks[] = ['label' => 'Teacher', 'url' => route('admin.master.teacher.add')];
-        }
-        if ($can('staff.add')) {
-            $addLinks[] = ['label' => 'Principal', 'url' => route('admin.staff.add', ['role' => 'principal'])];
-            $addLinks[] = ['label' => 'Receptionist', 'url' => route('admin.staff.add', ['role' => 'receptionist'])];
-            $addLinks[] = ['label' => 'Accountant', 'url' => route('admin.staff.add', ['role' => 'accountant'])];
-        }
-        if ($can('branch.add')) {
-            $addLinks[] = ['label' => 'Branch Manager', 'url' => route('admin.master.branch.add')];
-        }
-
-        $roleAdds = array_filter([
-            'teacher' => $can('teacher.add')
-                ? ['label' => 'Add Teacher', 'url' => route('admin.master.teacher.add')]
-                : null,
-            'principal' => $can('staff.add')
-                ? ['label' => 'Add Principal', 'url' => route('admin.staff.add', ['role' => 'principal'])]
-                : null,
-            'receptionist' => $can('staff.add')
-                ? ['label' => 'Add Receptionist', 'url' => route('admin.staff.add', ['role' => 'receptionist'])]
-                : null,
-            'accountant' => $can('staff.add')
-                ? ['label' => 'Add Accountant', 'url' => route('admin.staff.add', ['role' => 'accountant'])]
-                : null,
-            'branch_manager' => $can('branch.add')
-                ? ['label' => 'Add Branch Manager', 'url' => route('admin.master.branch.add')]
-                : null,
-        ]);
+        // $addLinks comes from the controller, keyed by role, already permission-filtered
+        // (users.add_{role}, with branch_manager also accepting the Branch module's own branch.add).
+        $roleAdds = collect($addLinks ?? [])
+            ->map(fn (array $link) => ['label' => 'Add '.$link['label'], 'url' => $link['url']])
+            ->all();
     @endphp
 
     <div class="container-xxl flex-grow-1 container-p-y admin-list-page" id="memberUsersPage" data-active-role="{{ $role }}">
@@ -158,10 +133,10 @@
                         <tbody>
                             @forelse ($users as $i => $row)
                                 @php
-                                    $canShow = $row['kind'] === 'teacher' ? $can('teacher.show') : $can('staff.show');
-                                    $canEdit = $row['kind'] === 'teacher' ? $can('teacher.edit') : $can('staff.edit');
-                                    $canStatus = $row['kind'] === 'teacher' ? $can('teacher.status') : $can('staff.status');
-                                    $canDelete = $row['kind'] === 'teacher' ? $can('teacher.delete') : $can('staff.delete');
+                                    $canShow = $row['can_show'];
+                                    $canEdit = $row['can_edit'];
+                                    $canStatus = $row['can_status'];
+                                    $canDelete = $row['can_delete'];
                                     $canPermissions = $can('roles.assign_permissions');
                                 @endphp
                                 <tr data-id="{{ $row['kind'] }}-{{ $row['id'] }}" data-user-role="{{ $row['role'] }}">

@@ -159,6 +159,26 @@ class StaffService
     }
 
     /**
+     * Which "Users" list tab this staff member belongs to: branch_manager, principal,
+     * receptionist, accountant, or 'other' (no dedicated tab).
+     */
+    public function roleTabFor(Staff $staff): string
+    {
+        $roleName = strtolower((string) $this->resolveRole($staff)['name']);
+
+        if (in_array($roleName, ['branch_manager', 'principal', 'receptionist', 'accountant'], true)) {
+            return $roleName;
+        }
+
+        if ($staff->user?->user_type === UserType::BranchManager
+            || strcasecmp(trim((string) $staff->designation), 'Branch Manager') === 0) {
+            return 'branch_manager';
+        }
+
+        return 'other';
+    }
+
+    /**
      * @param  Collection<int, Staff>  $staff
      * @return array<string, string>  key: "{user_id}:{institute_id}" => role name
      */

@@ -113,10 +113,16 @@
                                             value="{{ old('father_email', $inquiry?->email) }}">
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label">Father Phone <span class="req">*</span></label>
+                                        <label class="form-label">Contact 1 <span class="req">*</span></label>
                                         <input type="text" class="form-control" name="father_phone" required
                                             maxlength="15" inputmode="numeric" data-phone-input
                                             value="{{ old('father_phone', $inquiry?->phone) }}">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Contact 2</label>
+                                        <input type="text" class="form-control" name="father_phone_2"
+                                            maxlength="15" inputmode="numeric" data-phone-input
+                                            value="{{ old('father_phone_2', $inquiry?->phone_2) }}">
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Follow Up Date <span class="req">*</span></label>

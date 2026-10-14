@@ -33,7 +33,7 @@ class TeacherController extends AdminController
 
     public function create(): View
     {
-        $this->ensureCan('teacher.add');
+        $this->ensureCanAny(['teacher.add', 'users.add_teacher']);
 
         $instituteId = $this->currentInstituteId();
 
@@ -50,7 +50,7 @@ class TeacherController extends AdminController
 
     public function store(Request $request): JsonResponse|RedirectResponse
     {
-        $this->ensureCan('teacher.add');
+        $this->ensureCanAny(['teacher.add', 'users.add_teacher']);
 
         $validated = $this->validateTeacher($request);
         $instituteId = (int) $validated['institute_id'];
@@ -77,7 +77,7 @@ class TeacherController extends AdminController
 
     public function show(Request $request, Teacher $teacher): View
     {
-        $this->ensureCan('teacher.show');
+        $this->ensureCanAny(['teacher.show', 'users.view_teacher']);
         $this->assertVisible($teacher);
 
         $teacher->load([
@@ -106,7 +106,7 @@ class TeacherController extends AdminController
 
     public function edit(Teacher $teacher): View
     {
-        $this->ensureCan('teacher.edit');
+        $this->ensureCanAny(['teacher.edit', 'users.edit_teacher']);
         $this->assertVisible($teacher);
 
         $teacher->load(['user', 'branches', 'assignedBatches']);
@@ -129,7 +129,7 @@ class TeacherController extends AdminController
 
     public function update(Request $request, Teacher $teacher): JsonResponse|RedirectResponse
     {
-        $this->ensureCan('teacher.edit');
+        $this->ensureCanAny(['teacher.edit', 'users.edit_teacher']);
         $this->assertVisible($teacher);
 
         $validated = $this->validateTeacher($request, $teacher);
@@ -147,7 +147,7 @@ class TeacherController extends AdminController
 
     public function destroy(Request $request, Teacher $teacher): JsonResponse|RedirectResponse
     {
-        $this->ensureCan('teacher.delete');
+        $this->ensureCanAny(['teacher.delete', 'users.delete_teacher']);
         $this->assertVisible($teacher);
 
         $this->teacherService->delete($teacher);
@@ -163,7 +163,7 @@ class TeacherController extends AdminController
 
     public function toggleStatus(Teacher $teacher): JsonResponse
     {
-        $this->ensureCan('teacher.status');
+        $this->ensureCanAny(['teacher.status', 'users.status_teacher']);
         $this->assertVisible($teacher);
 
         $updated = $this->teacherService->toggleStatus($teacher);

@@ -22,6 +22,7 @@ class Inquiry extends Model
         'mother_name',
         'parent_name',
         'phone',
+        'phone_2',
         'email',
         'dob',
         'gender',

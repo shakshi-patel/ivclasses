@@ -57,6 +57,9 @@
                             <div class="master-profile-rows">
                                 <div class="master-profile-row"><span>Name</span><strong>{{ $student->name }}</strong></div>
                                 <div class="master-profile-row"><span>Contact No</span><strong>{{ $student->parent?->phone ?? '—' }}</strong></div>
+                                @if ($student->parent?->phone_2)
+                                    <div class="master-profile-row"><span>Contact No 2</span><strong>{{ $student->parent->phone_2 }}</strong></div>
+                                @endif
                                 <div class="master-profile-row"><span>Standards</span><strong>{{ $student->standard?->name ?? '—' }}</strong></div>
                                 <div class="master-profile-row"><span>Date Of Birth</span><strong>{{ optional($student->dob)->format('d M Y') ?? '—' }}</strong></div>
                                 <div class="master-profile-row"><span>Gender</span><strong>{{ $student->gender ? ucfirst($student->gender) : '—' }}</strong></div>

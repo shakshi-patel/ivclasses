@@ -34,7 +34,7 @@ class StaffController extends AdminController
 
     public function create(Request $request): View
     {
-        $this->ensureCan('staff.add');
+        $this->ensureCanAddStaff((string) $request->query('role', ''));
 
         $instituteId = $this->currentInstituteId();
         if ($instituteId) {
@@ -60,9 +60,12 @@ class StaffController extends AdminController
 
     public function store(Request $request): JsonResponse|RedirectResponse
     {
-        $this->ensureCan('staff.add');
-
         $validated = $this->validateStaff($request);
+        $roleName = ! empty($validated['role_id'])
+            ? strtolower((string) Role::query()->find($validated['role_id'])?->name)
+            : '';
+        $this->ensureCanAddStaff($roleName);
+
         $instituteId = (int) $validated['institute_id'];
 
         if ($limitError = $this->staffService->staffLimitError($instituteId)) {
@@ -87,7 +90,7 @@ class StaffController extends AdminController
 
     public function show(Request $request, Staff $staff): View
     {
-        $this->ensureCan('staff.show');
+        $this->ensureCanManageStaff($staff, 'show');
         $this->assertVisible($staff);
 
         $staff->load(['user', 'institute', 'branches']);
@@ -118,7 +121,7 @@ class StaffController extends AdminController
 
     public function edit(Staff $staff): View
     {
-        $this->ensureCan('staff.edit');
+        $this->ensureCanManageStaff($staff, 'edit');
         $this->assertVisible($staff);
 
         $staff->load(['user', 'branches']);
@@ -141,7 +144,7 @@ class StaffController extends AdminController
 
     public function update(Request $request, Staff $staff): JsonResponse|RedirectResponse
     {
-        $this->ensureCan('staff.edit');
+        $this->ensureCanManageStaff($staff, 'edit');
         $this->assertVisible($staff);
 
         $validated = $this->validateStaff($request, $staff);
@@ -159,7 +162,7 @@ class StaffController extends AdminController
 
     public function destroy(Request $request, Staff $staff): JsonResponse|RedirectResponse
     {
-        $this->ensureCan('staff.delete');
+        $this->ensureCanManageStaff($staff, 'delete');
         $this->assertVisible($staff);
 
         $this->staffService->delete($staff);
@@ -175,7 +178,7 @@ class StaffController extends AdminController
 
     public function toggleStatus(Staff $staff): JsonResponse
     {
-        $this->ensureCan('staff.status');
+        $this->ensureCanManageStaff($staff, 'status');
         $this->assertVisible($staff);
 
         $updated = $this->staffService->toggleStatus($staff);
@@ -310,5 +313,54 @@ class StaffController extends AdminController
         }
 
         BranchScope::for($user)->assertSharesBranchWith($staff->user);
+    }
+
+    /**
+     * `staff.add` still works as before; `users.add_{role}` (for principal/receptionist/accountant
+     * only — branch_manager/teacher are created through their own dedicated flows) is an
+     * additional, additive way to be granted the right to create that specific role.
+     */
+    protected function ensureCanAddStaff(string $roleName): void
+    {
+        $user = auth()->user();
+        if ($user && $user->isPlatformUser()) {
+            return;
+        }
+
+        if ($user && $user->can('staff.add')) {
+            return;
+        }
+
+        if ($user && in_array($roleName, ['principal', 'receptionist', 'accountant'], true)
+            && $user->can("users.add_{$roleName}")) {
+            return;
+        }
+
+        abort(403, 'Unauthorized.');
+    }
+
+    /**
+     * `staff.{action}` still works as before; the per-tab `users.{action}_{role}` permission
+     * (from the merged Users list) is an additional, additive way to be granted the same action.
+     */
+    protected function ensureCanManageStaff(Staff $staff, string $action): void
+    {
+        $user = auth()->user();
+        if ($user && $user->isPlatformUser()) {
+            return;
+        }
+
+        if ($user && $user->can("staff.{$action}")) {
+            return;
+        }
+
+        // `users.view_{tab}` doubles up as both "see in the list" and "view detail".
+        $usersAction = $action === 'show' ? 'view' : $action;
+        $tab = $this->staffService->roleTabFor($staff);
+        if ($user && $tab !== 'other' && $user->can("users.{$usersAction}_{$tab}")) {
+            return;
+        }
+
+        abort(403, 'Unauthorized.');
     }
 }

@@ -208,6 +208,46 @@ return [
             ],
         ],
 
+        // Governs ONLY the merged "Users" list page (Teacher / Branch Manager / Principal /
+        // Receptionist / Accountant tabs). Does not replace `teacher.*` / `staff.*`, which still
+        // guard the dedicated Teacher & Staff pages, profile tabs, attendance, reports, etc.
+        'users' => [
+            'name' => 'Users',
+            'enabled' => true,
+            'use_defaults' => false,
+            'actions' => [
+                'view_teacher' => 'View Teacher Tab',
+                'add_teacher' => 'Add Teacher',
+                'edit_teacher' => 'Edit Teacher',
+                'delete_teacher' => 'Delete Teacher',
+                'status_teacher' => 'Activate / Deactivate Teacher',
+
+                'view_branch_manager' => 'View Branch Manager Tab',
+                'add_branch_manager' => 'Add Branch Manager',
+                'edit_branch_manager' => 'Edit Branch Manager',
+                'delete_branch_manager' => 'Delete Branch Manager',
+                'status_branch_manager' => 'Activate / Deactivate Branch Manager',
+
+                'view_principal' => 'View Principal Tab',
+                'add_principal' => 'Add Principal',
+                'edit_principal' => 'Edit Principal',
+                'delete_principal' => 'Delete Principal',
+                'status_principal' => 'Activate / Deactivate Principal',
+
+                'view_receptionist' => 'View Receptionist Tab',
+                'add_receptionist' => 'Add Receptionist',
+                'edit_receptionist' => 'Edit Receptionist',
+                'delete_receptionist' => 'Delete Receptionist',
+                'status_receptionist' => 'Activate / Deactivate Receptionist',
+
+                'view_accountant' => 'View Accountant Tab',
+                'add_accountant' => 'Add Accountant',
+                'edit_accountant' => 'Edit Accountant',
+                'delete_accountant' => 'Delete Accountant',
+                'status_accountant' => 'Activate / Deactivate Accountant',
+            ],
+        ],
+
         'subject' => [
             'name' => 'Subject',
             'enabled' => true,

@@ -23,6 +23,9 @@
             <div><span>Standard</span><strong>{{ $inquiry->standard?->name ?? '—' }}</strong></div>
             <div><span>Father Name</span><strong>{{ $inquiry->father_name ?: ($inquiry->parent_name ?? '—') }}</strong></div>
             <div><span>Contact</span><strong>{{ $inquiry->phone ?? '—' }}</strong></div>
+            @if ($inquiry->phone_2)
+                <div><span>Contact 2</span><strong>{{ $inquiry->phone_2 }}</strong></div>
+            @endif
             <div><span>Email</span><strong>{{ $inquiry->email ?: '—' }}</strong></div>
             <div><span>Status</span><strong>{{ str_replace('_', ' ', ucfirst($inquiry->status ?? '—')) }}</strong></div>
             <div><span>School</span><strong>{{ $inquiry->school_name ?: '—' }}</strong></div>

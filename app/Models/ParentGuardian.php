@@ -22,6 +22,7 @@ class ParentGuardian extends Model
         'mother_name',
         'email',
         'phone',
+        'phone_2',
         'occupation',
         'address',
         'created_by',

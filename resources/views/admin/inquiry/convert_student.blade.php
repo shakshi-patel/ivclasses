@@ -35,6 +35,11 @@
                                 <div class="col-sm-6 col-lg-3">
                                     <div class="inq-convert-meta"><span class="lbl">Contact</span><span class="val">{{ $inquiry->phone }}</span></div>
                                 </div>
+                                @if ($inquiry->phone_2)
+                                    <div class="col-sm-6 col-lg-3">
+                                        <div class="inq-convert-meta"><span class="lbl">Contact 2</span><span class="val">{{ $inquiry->phone_2 }}</span></div>
+                                    </div>
+                                @endif
                                 <div class="col-sm-6 col-lg-3">
                                     <div class="inq-convert-meta"><span class="lbl">Father</span><span class="val">{{ $inquiry->father_name }}</span></div>
                                 </div>
