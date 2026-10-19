@@ -142,6 +142,7 @@ Mirror of `prd.md` phases. Tick as work completes.
 
 | Date | Phase | Type | Summary | Files / notes |
 |------|-------|------|---------|---------------|
+| 2026-10-19 | 9 | fix | batches `deleted_at_key` uses CASE not IFNULL (MariaDB import #1901) | migration `add_unique_branch_name_constraint_to_batches` |
 | 2026-10-19 | 9 | fix | B23: Hide billing bypass/dev .env hints from UI (bypass driver still works) | `billing/index`, `billing/platform` |
 | 2026-10-19 | 9 | fix | P4: Project Inquiry Demo Time fills after date pick (tear down Select2 on rebuild) | `project-inquiries/create.blade.php` |
 | 2026-10-19 | 9 | fix | B25: GST Generate (+) uses themed SweetAlert confirm + POST (no native localhost dialog) | `gst_invoice.blade.php` |
