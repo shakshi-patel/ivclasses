@@ -22,7 +22,7 @@ class DemoClientConfirmedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your IV Classes demo is confirmed',
+            subject: 'Your Class Flow demo is confirmed',
         );
     }
 

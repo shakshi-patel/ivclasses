@@ -11,11 +11,23 @@
  * AdminAjax.applyStatusToggle(btn, isActive) — pill + toggle icon/title
  * AdminAjax.statusFrom(response) — read status from Ajax payload
  * AdminAjax.submitForm(form, { redirectUrl })
+ * AdminAjax.clearFieldErrors(root?) — remove is-invalid + field error text in a form/modal
+ * AdminAjax.showFieldErrors(errors, fieldMap, { root?, fallback? }) — map Laravel errors to fields
+ * AdminAjax.escapeHtml(value) — escape user text before innerHTML / attribute interpolation
  * AdminAjax.followFirstEditLink(selector?) — ?open=edit on list → first Edit page link
  */
 window.AdminAjax = (function () {
   var OPEN_QUERY_PARAM = 'open';
   var OPEN_QUERY_EDIT = 'edit';
+
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
 
   function csrf() {
     return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
@@ -264,6 +276,96 @@ window.AdminAjax = (function () {
     return '';
   }
 
+  function resolveRoot(root) {
+    if (!root) return document;
+    if (typeof root === 'string') return document.querySelector(root) || document;
+    return root;
+  }
+
+  function clearFieldErrors(root) {
+    var scope = resolveRoot(root);
+    if (!scope.querySelectorAll) return;
+    scope.querySelectorAll('.is-invalid').forEach(function (el) {
+      el.classList.remove('is-invalid');
+    });
+    scope.querySelectorAll('[data-field-error]').forEach(function (el) {
+      el.textContent = '';
+      el.classList.remove('d-block');
+    });
+    if (scope.id && /Error$/i.test(scope.id)) {
+      scope.hidden = true;
+      scope.textContent = '';
+    }
+    var fallback = scope.querySelector ? scope.querySelector('[data-form-error]') : null;
+    if (fallback) {
+      fallback.hidden = true;
+      fallback.textContent = '';
+    }
+  }
+
+  /**
+   * @param {Record<string, string[]|string>|null} errors
+   * @param {Record<string, string|Element>} fieldMap  Laravel key → input selector/element
+   * @param {{ root?: string|Element, fallback?: string|Element }} options
+   */
+  function showFieldErrors(errors, fieldMap, options) {
+    options = options || {};
+    var scope = resolveRoot(options.root);
+    clearFieldErrors(scope);
+    if (!errors || typeof errors !== 'object') return false;
+
+    var leftover = [];
+    var shown = false;
+
+    Object.keys(errors).forEach(function (key) {
+      var messages = errors[key];
+      var msg = Array.isArray(messages) ? messages[0] : messages;
+      if (!msg) return;
+
+      var target = fieldMap && fieldMap[key];
+      var input = null;
+      if (typeof target === 'string') {
+        input = scope.querySelector ? scope.querySelector(target) : document.querySelector(target);
+      } else if (target && target.nodeType) {
+        input = target;
+      }
+
+      if (!input) {
+        leftover.push(String(msg));
+        return;
+      }
+
+      input.classList.add('is-invalid');
+      var wrap = input.closest('.mb-3, .mb-0, .field, .col-md-6, .col-12') || input.parentElement;
+      var feedback = wrap
+        ? wrap.querySelector('[data-field-error="' + key + '"], [data-field-error]')
+        : null;
+      if (!feedback) {
+        feedback = document.createElement('div');
+        feedback.className = 'invalid-feedback';
+        feedback.setAttribute('data-field-error', key);
+        input.insertAdjacentElement('afterend', feedback);
+      }
+      feedback.setAttribute('data-field-error', key);
+      feedback.textContent = String(msg);
+      feedback.classList.add('d-block');
+      shown = true;
+    });
+
+    if (leftover.length) {
+      var fb = options.fallback;
+      if (typeof fb === 'string') fb = document.querySelector(fb);
+      if (!fb && scope.querySelector) fb = scope.querySelector('[data-form-error]');
+      if (fb) {
+        fb.hidden = false;
+        fb.textContent = leftover.join('\n');
+        shown = true;
+      }
+    }
+
+    return shown;
+  }
+
   async function submitForm(form, options) {
     options = options || {};
     var url = form.getAttribute('action');
@@ -417,6 +519,9 @@ window.AdminAjax = (function () {
     applyStatusToggle: applyStatusToggle,
     statusFrom: statusFrom,
     submitForm: submitForm,
+    clearFieldErrors: clearFieldErrors,
+    showFieldErrors: showFieldErrors,
+    escapeHtml: escapeHtml,
     openFromQuery: openFromQuery,
     followFirstEditLink: followFirstEditLink,
     OPEN_QUERY_PARAM: OPEN_QUERY_PARAM,

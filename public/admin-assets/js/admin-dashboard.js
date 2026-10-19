@@ -1,5 +1,5 @@
 /**
- * IV Classes — dashboard charts.
+ * Class Flow — dashboard charts.
  * Fetches JSON from data-url and renders ApexCharts. Colours from iv-tokens.css.
  */
 (function () {
@@ -56,8 +56,16 @@
             return 0;
         }
         return series.reduce(function (total, s) {
-            var values = Array.isArray(s) ? s : (s && Array.isArray(s.data) ? s.data : []);
-            return total + nums(values).reduce(function (a, b) { return a + b; }, 0);
+            // Nested multi-series (line/bar): [[1,2,3], ...] or [{data:[1,2,3]}, ...].
+            if (Array.isArray(s)) {
+                return total + nums(s).reduce(function (a, b) { return a + b; }, 0);
+            }
+            if (s && typeof s === 'object' && Array.isArray(s.data)) {
+                return total + nums(s.data).reduce(function (a, b) { return a + b; }, 0);
+            }
+            // Flat series (donut/pie): [4, 4, 4, 4, 3] — each element is a plain value.
+            var n = Number(s);
+            return total + (Number.isFinite(n) ? n : 0);
         }, 0);
     };
 

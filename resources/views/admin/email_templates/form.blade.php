@@ -113,7 +113,7 @@
                                         </label>
                                         <input type="text" name="subject" class="form-control" required maxlength="255"
                                             value="{{ old('subject', $template->subject) }}"
-                                            placeholder="e.g. Your IV Classes login details — @{{institute_name}}">
+                                            placeholder="e.g. Your Class Flow login details — @{{institute_name}}">
                                     </div>
                                     <div class="col-12">
                                         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">

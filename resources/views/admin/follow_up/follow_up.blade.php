@@ -82,6 +82,7 @@
                                                     data-bs-target="#followUpDetailsModal"
                                                     data-inquiry-id="{{ $row->id }}"
                                                     data-student="{{ $row->student_name }}"
+                                                    data-inquiry-date="{{ optional($row->inquiry_date)->format('Y-m-d') }}"
                                                     data-followup="{{ optional($row->next_follow_up_at)->format('Y-m-d') }}"
                                                     data-history="{{ json_encode($row->followUpHistoryForUi()) }}">
                                                     <i class="bx bx-show me-1"></i> View Updates
@@ -169,7 +170,14 @@
                     document.getElementById('fuStudentName').textContent = btn.dataset.student || '';
                     const nextDateEl = document.getElementById('fuNextDate');
                     const remarksEl = document.getElementById('fuRemarks');
-                    if (nextDateEl) nextDateEl.value = btn.dataset.followup || '';
+                    const inquiryDate = btn.dataset.inquiryDate || '';
+                    if (nextDateEl) {
+                        nextDateEl.min = inquiryDate;
+                        nextDateEl.value = btn.dataset.followup || '';
+                        if (inquiryDate && nextDateEl.value && nextDateEl.value < inquiryDate) {
+                            nextDateEl.value = inquiryDate;
+                        }
+                    }
                     if (remarksEl) remarksEl.value = '';
 
                     let history = [];
@@ -196,7 +204,14 @@
                     await AdminAjax.error('Please enter follow-up remarks.');
                     return;
                 }
-                const nextDate = document.getElementById('fuNextDate').value || null;
+                const nextDateEl = document.getElementById('fuNextDate');
+                const nextDate = nextDateEl?.value || null;
+                const minDate = nextDateEl?.min || '';
+                if (nextDate && minDate && nextDate < minDate) {
+                    await AdminAjax.error('Follow-up date must be on or after the enquiry date.');
+                    nextDateEl.focus();
+                    return;
+                }
                 try {
                     await AdminAjax.post(storeUrl.replace('__ID__', id), {
                         remark: remark,

@@ -111,6 +111,7 @@
                                     <option value="{{ $inst->id }}">{{ $inst->name }}</option>
                                 @endforeach
                             </select>
+                            <div class="invalid-feedback" data-field-error="institute_id"></div>
                         </div>
                     @else
                         <input type="hidden" id="assetCategoryInstitute" value="{{ $defaultInstituteId }}">
@@ -118,6 +119,7 @@
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Category Name <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="assetCategoryName" required>
+                        <div class="invalid-feedback" data-field-error="name"></div>
                     </div>
                     <div class="mb-0">
                         <label class="form-label fw-semibold">Status</label>
@@ -125,8 +127,9 @@
                             <option value="active">Active</option>
                             <option value="inactive">Inactive</option>
                         </select>
+                        <div class="invalid-feedback" data-field-error="status"></div>
                     </div>
-                    <div class="text-danger small mt-2" id="assetCategoryError" hidden></div>
+                    <div class="text-danger small mt-2" id="assetCategoryError" data-form-error hidden></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -151,13 +154,19 @@
         return document.getElementById('assetCategoryInstitute')?.value || defaultInstituteId;
     }
 
+    const fieldMap = {
+        institute_id: '#assetCategoryInstitute',
+        name: '#assetCategoryName',
+        status: '#assetCategoryStatus'
+    };
+
     function resetForm() {
         document.getElementById('assetCategoryId').value = '';
         document.getElementById('assetCategoryName').value = '';
         document.getElementById('assetCategoryStatus').value = 'active';
         if (isPlatform) document.getElementById('assetCategoryInstitute').value = '';
         document.getElementById('assetCategoryModalTitle').textContent = 'Create Assets Category';
-        document.getElementById('assetCategoryError').hidden = true;
+        AdminAjax.clearFieldErrors(modalEl);
     }
 
     function openAddModal() {
@@ -219,7 +228,7 @@
             name: document.getElementById('assetCategoryName').value.trim(),
             status: document.getElementById('assetCategoryStatus').value
         };
-        const errEl = document.getElementById('assetCategoryError');
+        AdminAjax.clearFieldErrors(modalEl);
         try {
             const data = id
                 ? await AdminAjax.put(baseUrl + '/' + id, payload)
@@ -228,8 +237,16 @@
             await AdminAjax.success(data.message || (id ? 'Category updated.' : 'Category saved.'));
             window.location.reload();
         } catch (e) {
-            errEl.textContent = e.message;
-            errEl.hidden = false;
+            if (e.errors) {
+                AdminAjax.showFieldErrors(e.errors, fieldMap, {
+                    root: modalEl,
+                    fallback: '#assetCategoryError'
+                });
+            } else {
+                const errEl = document.getElementById('assetCategoryError');
+                errEl.textContent = e.message;
+                errEl.hidden = false;
+            }
         }
     });
 

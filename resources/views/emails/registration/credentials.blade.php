@@ -2,11 +2,11 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>IV Classes login details</title>
+    <title>Class Flow login details</title>
 </head>
 <body style="font-family: Arial, Helvetica, sans-serif; color: #1f2926; line-height: 1.6; padding: 24px; background: #f7f8f7;">
     <div style="max-width: 560px; margin: 0 auto; background: #ffffff; border-radius: 12px; padding: 28px 24px; border: 1px solid #e6ebe9;">
-        <h2 style="margin: 0 0 8px; color: #0f5c4d;">Welcome to IV Classes</h2>
+        <h2 style="margin: 0 0 8px; color: #0f5c4d;">Welcome to Class Flow</h2>
         <p style="margin: 0 0 18px; color: #5b6661;">
             Your institute <strong style="color: #1f2926;">{{ $credentials['institute_name'] }}</strong>
             is ready. Below are the logins created for you.
@@ -77,9 +77,9 @@
         </div>
 
         <p style="margin: 18px 0 0; color: #5b6661; font-size: 13px;">
-            If you did not expect this email, ignore it or contact IV Classes support.
+            If you did not expect this email, ignore it or contact Class Flow support.
         </p>
-        <p style="margin: 12px 0 0; font-weight: 700; color: #0f5c4d;">IV Classes</p>
+        <p style="margin: 12px 0 0; font-weight: 700; color: #0f5c4d;">Class Flow</p>
     </div>
 </body>
 </html>

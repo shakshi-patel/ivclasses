@@ -177,8 +177,8 @@
                     </div>
                     <div class="mb-3" id="apTrialDaysWrap">
                         <label class="form-label fw-semibold">Trial / period days</label>
-                        <input type="number" class="form-control" id="apTrialDays" value="14" min="1">
-                        <div class="form-text">Only used for Free Trial plan.</div>
+                        <input type="number" class="form-control" id="apTrialDays" value="14" min="1" max="365">
+                        <div class="form-text">Only used for Free Trial plan. Max 365 days.</div>
                     </div>
                     <div class="mb-0">
                         <label class="form-label fw-semibold">Billing cycle</label>
@@ -548,7 +548,12 @@
                         billing_cycle: document.getElementById('apCycle').value
                     };
                     if (planCode === 'trial') {
-                        payload.trial_days = document.getElementById('apTrialDays').value;
+                        const days = parseInt(document.getElementById('apTrialDays').value, 10);
+                        if (!Number.isFinite(days) || days < 1 || days > 365) {
+                            await AdminAjax.error('Trial days must be between 1 and 365.');
+                            return;
+                        }
+                        payload.trial_days = days;
                     }
                     const data = await AdminAjax.post(instituteUrl(routes.assignPlan, id), payload);
                     modal?.hide();

@@ -132,6 +132,7 @@
                                     <option value="{{ $inst->id }}">{{ $inst->name }}</option>
                                 @endforeach
                             </select>
+                            <div class="invalid-feedback" data-field-error="institute_id"></div>
                         </div>
                     @else
                         <input type="hidden" id="ieCategoryInstitute" value="{{ $defaultInstituteId }}">
@@ -139,10 +140,12 @@
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Name <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="ieCategoryName" required>
+                        <div class="invalid-feedback" data-field-error="name"></div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Sequence No <span class="text-danger">*</span></label>
                         <input type="number" class="form-control" id="ieCategorySort" min="0" value="0" required>
+                        <div class="invalid-feedback" data-field-error="sort_order"></div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Type <span class="text-danger">*</span></label>
@@ -150,6 +153,7 @@
                             <option value="income">Income</option>
                             <option value="expense">Expense</option>
                         </select>
+                        <div class="invalid-feedback" data-field-error="type"></div>
                     </div>
                     <div class="mb-0">
                         <label class="form-label fw-semibold">Status</label>
@@ -157,8 +161,9 @@
                             <option value="active">Active</option>
                             <option value="inactive">Inactive</option>
                         </select>
+                        <div class="invalid-feedback" data-field-error="status"></div>
                     </div>
-                    <div class="text-danger small mt-2" id="ieCategoryError" hidden></div>
+                    <div class="text-danger small mt-2" id="ieCategoryError" data-form-error hidden></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -183,6 +188,14 @@
         return document.getElementById('ieCategoryInstitute')?.value || defaultInstituteId;
     }
 
+    const fieldMap = {
+        institute_id: '#ieCategoryInstitute',
+        name: '#ieCategoryName',
+        sort_order: '#ieCategorySort',
+        type: '#ieCategoryType',
+        status: '#ieCategoryStatus'
+    };
+
     function resetForm() {
         document.getElementById('ieCategoryId').value = '';
         document.getElementById('ieCategoryName').value = '';
@@ -191,7 +204,7 @@
         document.getElementById('ieCategoryStatus').value = 'active';
         if (isPlatform) document.getElementById('ieCategoryInstitute').value = '';
         document.getElementById('ieCategoryModalTitle').textContent = 'Create Category';
-        document.getElementById('ieCategoryError').hidden = true;
+        AdminAjax.clearFieldErrors(modalEl);
     }
 
     function openAddModal() {
@@ -257,7 +270,7 @@
             type: document.getElementById('ieCategoryType').value,
             status: document.getElementById('ieCategoryStatus').value
         };
-        const errEl = document.getElementById('ieCategoryError');
+        AdminAjax.clearFieldErrors(modalEl);
         try {
             const data = id
                 ? await AdminAjax.put(baseUrl + '/' + id, payload)
@@ -266,8 +279,16 @@
             await AdminAjax.success(data.message || (id ? 'Category updated.' : 'Category saved.'));
             window.location.reload();
         } catch (e) {
-            errEl.textContent = e.message;
-            errEl.hidden = false;
+            if (e.errors) {
+                AdminAjax.showFieldErrors(e.errors, fieldMap, {
+                    root: modalEl,
+                    fallback: '#ieCategoryError'
+                });
+            } else {
+                const errEl = document.getElementById('ieCategoryError');
+                errEl.textContent = e.message;
+                errEl.hidden = false;
+            }
         }
     });
 

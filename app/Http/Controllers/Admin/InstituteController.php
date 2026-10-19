@@ -142,6 +142,22 @@ class InstituteController extends AdminController
         $trialDays = (int) ($validated['trial_days'] ?? $plan->trial_days ?: 14);
 
         DB::transaction(function () use ($institute, $plan, $cycle, $isTrialPlan, $trialDays) {
+            // New plan is unlimited for a resource → drop a stale numeric override
+            // so Billing shows Unlimited instead of an old custom cap.
+            $clear = [];
+            if ($plan->max_branches === null && $institute->max_branches_override !== null) {
+                $clear['max_branches_override'] = null;
+            }
+            if ($plan->max_students === null && $institute->max_students_override !== null) {
+                $clear['max_students_override'] = null;
+            }
+            if ($plan->max_staff === null && $institute->max_staff_override !== null) {
+                $clear['max_staff_override'] = null;
+            }
+            if ($clear !== []) {
+                $institute->update($clear);
+            }
+
             Subscription::query()
                 ->where('institute_id', $institute->id)
                 ->whereIn('status', [

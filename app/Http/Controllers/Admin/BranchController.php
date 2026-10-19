@@ -191,7 +191,7 @@ class BranchController extends AdminController
             'code' => ['nullable', 'string', 'max:40'],
             'manager_name' => ['required', 'string', 'max:150'],
             'manager_email' => ['required', 'email', 'max:150', $emailUnique],
-            'phone' => ['nullable', 'string', 'max:15'],
+            'phone' => ['nullable', 'string', 'regex:/^[0-9]{10,15}$/'],
             'city' => ['nullable', 'string', 'max:100'],
             'state' => ['nullable', 'string', 'max:100'],
             'pincode' => ['nullable', 'string', 'max:20'],

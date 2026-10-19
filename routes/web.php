@@ -61,6 +61,8 @@ use App\Services\Dashboard\TeacherDashboardService;
 use App\Services\Billing\SubscriptionBillingService;
 use Illuminate\Support\Facades\Route;
 
+
+
 Route::get('/', function (SubscriptionBillingService $billing) {
     return view('website.home', [
         'plans' => $billing->publicPlans(),
@@ -483,4 +485,4 @@ Route::middleware(['auth', EnsureInstituteActive::class, 'password.changed'])
         Route::get('/reports/roles', [ReportController::class, 'roles'])->name('reports.roles');
     });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

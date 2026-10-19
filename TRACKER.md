@@ -11,7 +11,7 @@
 |-------|--------|
 | **Phase** | Phase 9 polish |
 | **Status** | Phase 0–6 done · Phase 7 mostly done · Phase 8 not started · Phase 9 DomPDF/receipts/dashboard UX in progress |
-| **Last updated** | 2026-10-01 |
+| **Last updated** | 2026-10-19 |
 | **Active module** | Institute first-login setup + theme PDFs + receipts + dashboard UX |
 | **Blocked by** | Local subdomain setup on Laragon (`*.ivclasses.test`) — optional |
 | **PRD file** | `67c33d59a4db_prd.md` (v1.5 + §16.8 SweetAlert standard) |
@@ -142,6 +142,19 @@ Mirror of `prd.md` phases. Tick as work completes.
 
 | Date | Phase | Type | Summary | Files / notes |
 |------|-------|------|---------|---------------|
+| 2026-10-19 | 9 | fix | B23: Hide billing bypass/dev .env hints from UI (bypass driver still works) | `billing/index`, `billing/platform` |
+| 2026-10-19 | 9 | fix | P4: Project Inquiry Demo Time fills after date pick (tear down Select2 on rebuild) | `project-inquiries/create.blade.php` |
+| 2026-10-19 | 9 | fix | B25: GST Generate (+) uses themed SweetAlert confirm + POST (no native localhost dialog) | `gst_invoice.blade.php` |
+| 2026-10-19 | 9 | fix | B15: Re-creating a soft-deleted standard/subject restores it (no 500 unique conflict) | `StandardController`/`SubjectController` store, migration drop unique name |
+| 2026-10-19 | 9 | fix | B12: Block deleting a standard that still has batches, students, or inquiries | `StandardController@destroy`, `Standard` relations |
+| 2026-10-19 | 9 | fix | B7: Global search no longer 404s/crashes; loads permission-aware admin pages (Ctrl+/) | `AdminSearchCatalog`, layout, `main.js`, `config.js` assetsPath slash |
+| 2026-10-19 | 9 | fix | B11: Escape Standard/Subject names in AJAX-built table rows (stored HTML/XSS via innerHTML) | `admin-ajax.js` `escapeHtml`, `standard.blade.php`, `subject.blade.php` |
+| 2026-10-19 | 9 | fix | P2/P3: Plan yearly price must be ≥ monthly; Student Attendance Module Help intro no longer copies teacher text | `PlanController`, plans form, migration `fix_student_attendance_module_help_intro` |
+| 2026-10-19 | 9 | fix | Assign plan trial days capped at 365 on the form (server already had max 365) | `institutes/index.blade.php`, plans form |
+| 2026-10-19 | 9 | fix | Inventory asset purchase date cannot be in the future (form max today + server `before_or_equal:today`) | `InventoryAssetController`, `add_inventory_assets` |
+| 2026-10-19 | 9 | fix | B22/B24: Friendly 405 page for POST-only URLs; Enterprise Unlimited no longer hidden by a stale branch override | `errors/405`, `bootstrap/app.php`, billing, `PlanLimit`/assign/activate |
+| 2026-10-19 | 9 | fix | B13/B17/B21: Standard deactivate asks confirm; follow-up date must be on/after enquiry date; exam max marks min 1 | `standard.blade.php`, Inquiry/FollowUp controllers, `add_exam` |
+| 2026-10-19 | 9 | fix | Master modal validation errors (Standard/Subject/etc.) now show under the correct field instead of under Status | `admin-ajax.js` `showFieldErrors`, standard/subject/assets/IE modals |
 | 2026-10-01 | 9 | ui | Start Trial form drops the left pitch and uses the full width. The heading shows the chosen plan and its free-trial days | `register_institute.blade.php`, `style.css` |
 | 2026-10-01 | 9 | feat | Homepage and Start Trial show the public institute plans as cards. A plan button opens the registration form with that plan; opening Start Trial directly shows the cards first | `plan_cards`, `home`, `register_institute`, `style.css` |
 | 2026-10-01 | 9 | ui | Member menu: Teachers and Staff are one Users list. Tabs above the table filter Branch Manager, Teacher, Principal, Receptionist, and Accountant | `MemberUserController`, `users.blade.php`, sidebar |
@@ -243,6 +256,11 @@ Mirror of `prd.md` phases. Tick as work completes.
 
 | Date | Phase | Error | Cause | Fix | Status |
 |------|-------|-------|-------|-----|--------|
+| 2026-10-19 | 9 | Assign plan accepted trial days like 99999 | Input had `min=1` only; no client max | Form `max=365` + JS check; server already `max:365` | Resolved |
+| 2026-10-19 | 9 | Asset saved with future purchase date (e.g. 2030) | Purchase date had no max/today rule | Form `max=today` + server `before_or_equal:today` | Resolved |
+| 2026-10-19 | 9 | POST-only admin URL shows raw Method Not Allowed; Enterprise billing shows 2/3 not Unlimited | No 405 view; institute had `max_branches_override=3` over unlimited plan | Friendly `errors/405`; clear stale overrides on unlimited plan assign/activate; billing labels custom caps | Resolved |
+| 2026-10-19 | 9 | Standard deactivate had no confirm; follow-up before enquiry date; exam max marks 0 allowed | Toggle skipped confirm; date rules missing; `total_marks` min was 0 | Confirm on deactivate; `after_or_equal` enquiry date; `total_marks` min 1 | Resolved |
+| 2026-10-19 | 9 | Add Standard validation message shows under Status | All modal errors dumped into one bottom `#…FormError` div under the last field | Map Laravel error keys to each field with `AdminAjax.showFieldErrors` | Resolved |
 | 2026-10-01 | 9 | After setup, the institute admin sees the parent dashboard | Student save used the admin email as the father's email and overwrote `user_type` to parent | Keep staff logins unchanged when the parent email matches them. Restored this account to institute admin | Resolved |
 | 2026-10-01 | 9 | Standard step Continue still freezes the whole page | How to manage Standards opens with a full-screen Shepherd overlay on top of the setup card. The overlay captures every click | During setup, do not start either tour. Only the instruction bar is shown, and any overlay is removed | Resolved |
 | 2026-10-01 | 9 | After setup Continue the page freezes, as if two modals are open | Setup highlight and that page’s How it works tour both start. The tour overlay sits above the Add form, so the screen cannot be clicked | Do not boot How it works while `onboarding_step` is set. Close the highlight when Add opens the form | Resolved |

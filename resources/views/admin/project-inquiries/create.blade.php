@@ -58,7 +58,7 @@
                         <div class="col-md-6">
                             <label class="form-label fw-semibold" style="color: var(--iv-primary);">Phone / WhatsApp *</label>
                             <input type="text" name="contact_no" class="form-control" value="{{ old('contact_no') }}"
-                                maxlength="15" inputmode="numeric" data-phone-input required>
+                                maxlength="15" minlength="10" pattern="[0-9]{10,15}" inputmode="numeric" data-phone-input required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold" style="color: var(--iv-primary);">Email *</label>
@@ -110,7 +110,8 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold" style="color: var(--iv-primary);">Demo Time *</label>
-                            <select name="demo_start_time" id="demoTime" class="form-select" required disabled>
+                            <select name="demo_start_time" id="demoTime" class="form-select no-search-select"
+                                data-no-search required disabled>
                                 <option value="">Select date first</option>
                             </select>
                             <div class="text-danger small mt-1" id="demoTimeBookedMsg">{{ $errors->first('demo_start_time') }}
@@ -138,6 +139,8 @@
             const demoTimeBookedMsg = document.getElementById('demoTimeBookedMsg');
             const bookedMessage = 'This time is already booked for a demo.';
             const form = document.getElementById('adminDemoForm');
+            const slotsUrl = @json(route('book-demo.available-slots'));
+            let slotsAbort = null;
 
             function setBookedMessage(show) {
                 if (demoTimeBookedMsg) {
@@ -146,9 +149,13 @@
             }
 
             function formatTime(time) {
-                const [hours, minutes] = time.split(':');
+                if (!time) return '';
+                const parts = String(time).split(':');
+                const hours = parseInt(parts[0], 10);
+                const minutes = parseInt(parts[1] || '0', 10);
+                if (Number.isNaN(hours)) return String(time);
                 const date = new Date();
-                date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+                date.setHours(hours, minutes, 0, 0);
                 return date.toLocaleTimeString('en-IN', {
                     hour: 'numeric',
                     minute: '2-digit',
@@ -156,52 +163,93 @@
                 });
             }
 
-            demoDate.addEventListener('change', function() {
-                const date = this.value;
-                demoTime.innerHTML = '';
-                demoTime.disabled = true;
+            /** Select2 wraps .form-select globally — tear it down so option rebuilds are visible. */
+            function teardownSelect2() {
+                if (!window.jQuery || !jQuery.fn || !jQuery.fn.select2) return;
+                const $el = jQuery(demoTime);
+                if ($el.hasClass('select2-hidden-accessible')) {
+                    $el.select2('destroy');
+                }
+                const $wrap = $el.parent();
+                if ($wrap.hasClass('admin-select-wrap')) {
+                    $el.unwrap();
+                }
+            }
+
+            function setTimeOptions(html, enable) {
+                teardownSelect2();
+                demoTime.innerHTML = html;
+                demoTime.disabled = !enable;
+                demoTime.value = '';
+            }
+
+            function loadSlots(date) {
+                if (slotsAbort) slotsAbort.abort();
                 setBookedMessage(false);
 
                 if (!date) {
-                    demoTime.innerHTML = '<option value="">Select date first</option>';
+                    setTimeOptions('<option value="">Select date first</option>', false);
                     return;
                 }
 
-                demoTime.innerHTML = '<option value="">Loading times...</option>';
+                setTimeOptions('<option value="">Loading times...</option>', false);
+                slotsAbort = new AbortController();
 
-                fetch("{{ route('book-demo.available-slots') }}?date=" + encodeURIComponent(date), {
+                fetch(slotsUrl + '?date=' + encodeURIComponent(date), {
+                        method: 'GET',
+                        credentials: 'same-origin',
+                        signal: slotsAbort.signal,
                         headers: {
                             'Accept': 'application/json',
                             'X-Requested-With': 'XMLHttpRequest'
                         }
                     })
-                    .then(response => response.json())
-                    .then(data => {
-                        demoTime.innerHTML = '';
-                        if (!data.success || !data.slots || data.slots.length === 0) {
-                            demoTime.innerHTML = '<option value="">No slots available</option>';
+                    .then(function(response) {
+                        return response.json();
+                    })
+                    .then(function(data) {
+                        if (demoDate.value !== date) return;
+
+                        const slots = Array.isArray(data?.slots) ? data.slots : [];
+                        if (!data?.success || !slots.length) {
+                            setTimeOptions('<option value="">No slots available</option>', false);
                             return;
                         }
 
+                        teardownSelect2();
+                        demoTime.innerHTML = '';
                         const defaultOption = document.createElement('option');
                         defaultOption.value = '';
                         defaultOption.textContent = 'Select time';
                         demoTime.appendChild(defaultOption);
 
-                        data.slots.forEach(slot => {
+                        slots.forEach(function(slot) {
+                            const start = slot.start_time || '';
+                            const end = slot.end_time || '';
+                            const booked = !!(slot.booked || slot.available === false);
                             const option = document.createElement('option');
-                            option.value = slot.start_time;
-                            option.textContent = formatTime(slot.start_time) + ' - ' + formatTime(slot
-                                .end_time) + (slot.booked ? ' (Booked)' : '');
-                            option.dataset.booked = slot.booked ? '1' : '0';
+                            option.value = start;
+                            option.textContent = formatTime(start) + (end ? ' - ' + formatTime(end) : '') +
+                                (booked ? ' (Booked)' : '');
+                            option.dataset.booked = booked ? '1' : '0';
                             demoTime.appendChild(option);
                         });
 
                         demoTime.disabled = false;
+                        demoTime.value = '';
                     })
-                    .catch(() => {
-                        demoTime.innerHTML = '<option value="">Unable to load slots</option>';
+                    .catch(function(err) {
+                        if (err && err.name === 'AbortError') return;
+                        if (demoDate.value !== date) return;
+                        setTimeOptions('<option value="">Unable to load slots</option>', false);
                     });
+            }
+
+            demoDate.addEventListener('change', function() {
+                loadSlots(this.value);
+            });
+            demoDate.addEventListener('input', function() {
+                loadSlots(this.value);
             });
 
             demoTime.addEventListener('change', function() {
@@ -216,6 +264,11 @@
                     setBookedMessage(true);
                 }
             });
+
+            teardownSelect2();
+            if (demoDate.value) {
+                loadSlots(demoDate.value);
+            }
         });
     </script>
 @endpush

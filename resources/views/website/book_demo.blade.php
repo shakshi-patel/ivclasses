@@ -83,7 +83,7 @@
                                 <div class="field">
                                     <label for="phone">Phone / WhatsApp *</label>
                                     <input type="tel" id="phone" name="contact_no" value="{{ old('contact_no') }}"
-                                        required autocomplete="tel" maxlength="15" inputmode="numeric" data-phone-input placeholder="+91" />
+                                        required autocomplete="tel" maxlength="15" minlength="10" pattern="[0-9]{10,15}" inputmode="numeric" data-phone-input placeholder="+91" />
                                     <span class="error" data-error="contact_no">{{ $errors->first('contact_no') }}</span>
                                 </div>
                                 <div class="field">

@@ -197,10 +197,21 @@ class SubscriptionBillingService
             ? (float) ($plan->price_yearly ?? 0)
             : (float) ($plan->price_monthly ?? 0);
 
-        $institute->update([
+        $clear = [
             'status' => InstituteStatus::Active,
             'trial_ends_at' => null,
-        ]);
+        ];
+        // Unlimited plan fields should not keep an old custom cap.
+        if ($plan->max_branches === null) {
+            $clear['max_branches_override'] = null;
+        }
+        if ($plan->max_students === null) {
+            $clear['max_students_override'] = null;
+        }
+        if ($plan->max_staff === null) {
+            $clear['max_staff_override'] = null;
+        }
+        $institute->update($clear);
 
         return Subscription::query()->create([
             'institute_id' => $institute->id,

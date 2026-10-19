@@ -24,7 +24,7 @@ enum AuthPortal: string
     public function description(): string
     {
         return match ($this) {
-            self::Platform => 'IV Classes super admin & developer access.',
+            self::Platform => 'Class Flow super admin & developer access.',
             self::Institute => 'Institute admin, accountant, receptionist and teachers.',
             self::Principal => 'Principal workspace — assigned branch academics & operations.',
             self::Branch => 'Branch manager workspace — one branch operations.',

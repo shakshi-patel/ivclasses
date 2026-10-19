@@ -7,7 +7,7 @@
 <body style="font-family: Arial, sans-serif; color: #1f2926; line-height: 1.6; padding: 24px;">
     <h2 style="margin-bottom: 8px; color: #0f5c4d;">We received your demo request</h2>
     <p>
-        Thanks for booking a demo with IV Classes.
+        Thanks for booking a demo with Class Flow.
         Our team will review this slot and confirm shortly.
     </p>
 
@@ -24,6 +24,6 @@
         with the Google Meet link.
     </p>
 
-    <p>IV Classes</p>
+    <p>Class Flow</p>
 </body>
 </html>

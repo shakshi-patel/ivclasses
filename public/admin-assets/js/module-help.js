@@ -344,11 +344,20 @@
       }
     });
 
+    var doneClicked = false;
+
     steps.forEach(function (step, index) {
       var isFirst = index === 0;
       var isLast = index === steps.length - 1;
       var buttons = [
-        { text: 'Skip', classes: backClass, action: tour.cancel }
+        {
+          text: 'Skip',
+          classes: backClass,
+          // Skip never finishes the tour — on the last step it just closes it, same as
+          // the X icon, so an unfinished tour (skipped all the way through or not) still
+          // reopens on the next visit. Only the explicit Done click below marks it seen.
+          action: isLast ? tour.cancel : tour.next
+        }
       ];
       if (!isFirst) {
         buttons.push({ text: 'Back', classes: backClass, action: tour.back });
@@ -356,7 +365,10 @@
       buttons.push({
         text: isLast ? 'Done' : 'Next',
         classes: nextClass,
-        action: isLast ? tour.complete : tour.next
+        action: isLast ? function () {
+          doneClicked = true;
+          tour.complete();
+        } : tour.next
       });
 
       var options = {
@@ -377,13 +389,17 @@
     });
     tour.on('complete', function () {
       activeTour = null;
-      markDone((currentGuide && currentGuide.id) || boot.guide_id);
+      if (doneClicked) {
+        markDone((currentGuide && currentGuide.id) || boot.guide_id);
+      }
       if (window.IvdDashboard && typeof window.IvdDashboard.resizeCharts === 'function') {
         setTimeout(window.IvdDashboard.resizeCharts, 50);
       }
     });
     tour.on('cancel', function () {
       activeTour = null;
+      // Closing (the X icon) just hides the tour for now — only finishing it via Done
+      // persists the "seen" flag, so an unfinished/closed tour reopens on the next visit.
       if (window.IvdDashboard && typeof window.IvdDashboard.resizeCharts === 'function') {
         setTimeout(window.IvdDashboard.resizeCharts, 50);
       }

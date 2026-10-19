@@ -46,7 +46,10 @@ window.config = {
   enableMenuLocalStorage: true // Enable menu state with local storage support
 };
 
-window.assetsPath = document.documentElement.getAttribute('data-assets-path');
+window.assetsPath = document.documentElement.getAttribute('data-assets-path') || '';
+if (window.assetsPath && !/\/$/.test(window.assetsPath)) {
+  window.assetsPath += '/';
+}
 window.templateName = document.documentElement.getAttribute('data-template');
 window.rtlSupport = true; // set true for rtl support (rtl + ltr), false for ltr only.
 

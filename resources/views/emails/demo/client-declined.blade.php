@@ -7,7 +7,7 @@
 <body style="font-family: Arial, sans-serif; color: #1f2926; line-height: 1.6; padding: 24px;">
     <h2 style="margin-bottom: 8px; color: #0f5c4d;">Update on your demo request</h2>
     <p>
-        Thank you for your interest in IV Classes.
+        Thank you for your interest in Class Flow.
         Unfortunately we could not confirm the slot below.
         Please book another time that works for you.
     </p>
@@ -24,6 +24,6 @@
         </a>
     </p>
 
-    <p>IV Classes</p>
+    <p>Class Flow</p>
 </body>
 </html>

@@ -8,7 +8,7 @@
                 <span class="ivd-list__title">{{ $payment->student?->name ?? 'Unknown student' }}</span>
                 <span class="ivd-list__meta">
                     {{ $payment->receipt_no ?: '#' . $payment->id }}
-                    · {{ \Illuminate\Support\Str::headline($payment->payment_method ?: 'cash') }}
+                    · {{ \App\Support\PaymentMethodLabel::format($payment->payment_method) }}
                     · {{ $payment->payment_date?->format('d M') }}
                 </span>
             </div>

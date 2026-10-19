@@ -55,7 +55,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Maximum Marks <span class="req">*</span></label>
-                                        <input type="number" class="form-control" name="total_marks" min="0" step="0.01" required value="{{ old('total_marks', $exam?->total_marks ?? 0) }}">
+                                        <input type="number" class="form-control" name="total_marks" min="1" step="0.01" required value="{{ old('total_marks', $exam?->total_marks ?? '') }}">
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Exam Document</label>

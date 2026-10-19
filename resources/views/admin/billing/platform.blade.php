@@ -27,16 +27,6 @@
                     Assign plan without payment stays on the Institutes page.
                 </p>
 
-                @if ($isBypassMode)
-                    <div class="alert alert-info d-flex align-items-center mt-3 mb-0" role="alert">
-                        <i class="bx bx-info-circle me-2 fs-5"></i>
-                        <div>
-                            Gateway checkout is in <strong>bypass</strong> mode.
-                            Offline collection records a real paid invoice now.
-                        </div>
-                    </div>
-                @endif
-
                 <div class="master-stu-form-wrap mt-4">
                     <div class="master-stu-form-card">
                         <div class="stu-form-head">Pay for an institute</div>

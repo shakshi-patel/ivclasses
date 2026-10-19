@@ -163,9 +163,17 @@ class InquiryController extends AdminController
         $this->ensureCan('follow_up.add');
         $this->assertVisible($inquiry);
 
+        $inquiryDate = optional($inquiry->inquiry_date)->format('Y-m-d');
+
         $validated = $request->validate([
             'remark' => ['required', 'string', 'max:2000'],
-            'next_follow_up_at' => ['nullable', 'date'],
+            'next_follow_up_at' => array_values(array_filter([
+                'nullable',
+                'date',
+                $inquiryDate ? 'after_or_equal:'.$inquiryDate : null,
+            ])),
+        ], [
+            'next_follow_up_at.after_or_equal' => 'The follow-up date must be on or after the enquiry date.',
         ]);
 
         $followUp = $this->inquiryService->addFollowUp($inquiry, [
@@ -282,8 +290,8 @@ class InquiryController extends AdminController
             'father_name' => ['required', 'string', 'max:150'],
             'mother_name' => ['nullable', 'string', 'max:150'],
             'father_email' => ['required', 'email', 'max:150'],
-            'father_phone' => ['required', 'string', 'max:15'],
-            'father_phone_2' => ['nullable', 'string', 'max:15'],
+            'father_phone' => ['required', 'string', 'regex:/^[0-9]{10,15}$/'],
+            'father_phone_2' => ['nullable', 'string', 'regex:/^[0-9]{10,15}$/'],
             'father_occupation' => ['nullable', 'string', 'max:100'],
             'dob' => ['nullable', 'date'],
             'gender' => ['required', 'in:Male,Female,Other,male,female,other'],
@@ -292,13 +300,15 @@ class InquiryController extends AdminController
             'category' => ['required', 'in:General,OBC,SC,ST'],
             'inquiry_date' => ['required', 'date'],
             'school_name' => ['nullable', 'string', 'max:150'],
-            'follow_up_date' => ['required', 'date'],
+            'follow_up_date' => ['required', 'date', 'after_or_equal:inquiry_date'],
             'follow_up_remark' => ['required', 'string', 'max:2000'],
             'form_fees' => ['nullable', 'numeric', 'min:0'],
             'form_fees_payment_method' => ['nullable', 'in:Cash,Online,UPI,Cheque'],
             'address' => ['nullable', 'string', 'max:1000'],
             'photo' => ['nullable', 'image', 'max:2048'],
             'source' => ['nullable', 'string', 'max:30'],
+        ], [
+            'follow_up_date.after_or_equal' => 'The follow-up date must be on or after the enquiry date.',
         ]);
     }
 

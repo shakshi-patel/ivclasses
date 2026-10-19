@@ -86,7 +86,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Inquiry Date <span class="req">*</span></label>
-                                        <input type="date" class="form-control" name="inquiry_date" required
+                                        <input type="date" class="form-control" name="inquiry_date" id="inquiryDate" required
                                             value="{{ old('inquiry_date', optional($inquiry?->inquiry_date)->format('Y-m-d') ?? date('Y-m-d')) }}">
                                     </div>
                                     <div class="col-md-6">
@@ -115,18 +115,19 @@
                                     <div class="col-md-6">
                                         <label class="form-label">Contact 1 <span class="req">*</span></label>
                                         <input type="text" class="form-control" name="father_phone" required
-                                            maxlength="15" inputmode="numeric" data-phone-input
+                                            maxlength="15" minlength="10" pattern="[0-9]{10,15}" inputmode="numeric" data-phone-input
                                             value="{{ old('father_phone', $inquiry?->phone) }}">
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Contact 2</label>
                                         <input type="text" class="form-control" name="father_phone_2"
-                                            maxlength="15" inputmode="numeric" data-phone-input
+                                            maxlength="15" minlength="10" pattern="[0-9]{10,15}" inputmode="numeric" data-phone-input
                                             value="{{ old('father_phone_2', $inquiry?->phone_2) }}">
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Follow Up Date <span class="req">*</span></label>
-                                        <input type="date" class="form-control" name="follow_up_date" required
+                                        <input type="date" class="form-control" name="follow_up_date" id="inquiryFollowUpDate" required
+                                            min="{{ old('inquiry_date', optional($inquiry?->inquiry_date)->format('Y-m-d') ?? date('Y-m-d')) }}"
                                             value="{{ old('follow_up_date', optional($inquiry?->next_follow_up_at)->format('Y-m-d') ?? date('Y-m-d')) }}">
                                     </div>
                                     <div class="col-12">
@@ -175,15 +176,38 @@
 
 @push('scripts')
     <script>
-        document.getElementById('inquiryForm')?.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const btn = this.querySelector('[type="submit"]');
-            if (btn) btn.disabled = true;
-            try {
-                await AdminAjax.submitForm(this, { redirectUrl: @json(route('admin.inquiry')) });
-            } catch (err) {
-                if (btn) btn.disabled = false;
+        (function() {
+            const inquiryDate = document.getElementById('inquiryDate');
+            const followUpDate = document.getElementById('inquiryFollowUpDate');
+
+            function syncFollowUpMin() {
+                if (!inquiryDate || !followUpDate) return;
+                const min = inquiryDate.value || '';
+                followUpDate.min = min;
+                if (min && followUpDate.value && followUpDate.value < min) {
+                    followUpDate.value = min;
+                }
             }
-        });
+
+            inquiryDate?.addEventListener('change', syncFollowUpMin);
+            syncFollowUpMin();
+
+            document.getElementById('inquiryForm')?.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                syncFollowUpMin();
+                if (inquiryDate?.value && followUpDate?.value && followUpDate.value < inquiryDate.value) {
+                    await AdminAjax.error('Follow-up date must be on or after the enquiry date.');
+                    followUpDate.focus();
+                    return;
+                }
+                const btn = this.querySelector('[type="submit"]');
+                if (btn) btn.disabled = true;
+                try {
+                    await AdminAjax.submitForm(this, { redirectUrl: @json(route('admin.inquiry')) });
+                } catch (err) {
+                    if (btn) btn.disabled = false;
+                }
+            });
+        })();
     </script>
 @endpush

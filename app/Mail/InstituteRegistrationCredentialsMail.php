@@ -35,7 +35,7 @@ class InstituteRegistrationCredentialsMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your IV Classes login details — '.$this->credentials['institute_name'],
+            subject: 'Your Class Flow login details — '.$this->credentials['institute_name'],
         );
     }
 

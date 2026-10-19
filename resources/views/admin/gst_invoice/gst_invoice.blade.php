@@ -90,28 +90,38 @@
 
 @push('scripts')
 <script>
-document.querySelectorAll('.btn-gst-generate').forEach(function(btn) {
-    btn.addEventListener('click', async function() {
-        if (!confirm('Generate GST invoice for this payment?')) return;
+(function() {
+    document.addEventListener('click', async function(e) {
+        var btn = e.target.closest('.btn-gst-generate');
+        if (!btn) return;
+
+        e.preventDefault();
+        if (btn.disabled) return;
+
+        var url = btn.dataset.url;
+        if (!url) {
+            await AdminAjax.error('Generate URL is missing.');
+            return;
+        }
+
+        var ok = await AdminAjax.confirm({
+            title: 'Generate GST invoice?',
+            text: 'Create a GST invoice for this fee payment.',
+            confirmText: 'Yes, generate',
+            icon: 'question'
+        });
+        if (!ok) return;
+
         btn.disabled = true;
         try {
-            const res = await fetch(btn.dataset.url, {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
-                }
-            });
-            const data = await res.json();
-            if (!res.ok || !data.success) throw new Error(data.message || 'Failed');
-            if (window.Swal) await Swal.fire({ icon: 'success', title: 'Generated', timer: 1500, showConfirmButton: false });
+            var data = await AdminAjax.post(url);
+            await AdminAjax.success(data.message || 'GST invoice generated.');
             window.location.reload();
-        } catch (e) {
-            if (window.Swal) Swal.fire({ icon: 'error', title: 'Error', text: e.message });
+        } catch (err) {
+            await AdminAjax.error(err.message || 'Failed to generate GST invoice.');
             btn.disabled = false;
         }
     });
-});
+})();
 </script>
 @endpush

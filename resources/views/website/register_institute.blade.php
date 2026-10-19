@@ -94,7 +94,7 @@
                                 <div class="field {{ $errors->has('phone') ? 'has-error' : '' }}">
                                     <label for="trialPhone">Phone / WhatsApp</label>
                                     <input type="tel" id="trialPhone" name="phone" value="{{ old('phone') }}"
-                                        autocomplete="tel" maxlength="15" inputmode="numeric" data-phone-input placeholder="+91" />
+                                        autocomplete="tel" maxlength="15" minlength="10" pattern="[0-9]{10,15}" inputmode="numeric" data-phone-input placeholder="+91" />
                                     <span class="error">{{ $errors->first('phone') }}</span>
                                 </div>
                             </div>
@@ -211,7 +211,7 @@
                 </div>
                 <div class="field">
                     <label>Branch Phone</label>
-                    <input type="tel" name="branches[__INDEX__][phone]" maxlength="15" inputmode="numeric" data-phone-input placeholder="+91" />
+                    <input type="tel" name="branches[__INDEX__][phone]" maxlength="15" minlength="10" pattern="[0-9]{10,15}" inputmode="numeric" data-phone-input placeholder="+91" />
                 </div>
             </div>
             <div class="field" style="margin-bottom: 14px;">

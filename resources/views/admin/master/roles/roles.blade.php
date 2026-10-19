@@ -143,6 +143,7 @@
                                 <label class="form-label fw-semibold" for="roleName">Role Name <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="roleName" name="name"
                                     placeholder="e.g. Teacher" required>
+                                <div class="invalid-feedback" id="roleNameError"></div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold" for="roleStatus">Status <span class="text-danger">*</span></label>
@@ -319,8 +320,11 @@
                 });
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok || data.success === false) {
-                    const msg = data.message || (data.errors ? Object.values(data.errors).flat().join('\n') : 'Request failed');
-                    throw new Error(msg);
+                    const flat = data.errors ? Object.values(data.errors).flat() : [];
+                    const msg = flat.length ? flat.join('\n') : (data.message || 'Request failed');
+                    const err = new Error(msg);
+                    err.errors = data.errors || null;
+                    throw err;
                 }
                 return data;
             }
@@ -362,16 +366,34 @@
             const permModalEl = document.getElementById('rolePermissionsModal');
             const permModal = permModalEl ? new bootstrap.Modal(permModalEl) : null;
 
+            function clearRoleFieldErrors() {
+                document.getElementById('roleName')?.classList.remove('is-invalid');
+                const err = document.getElementById('roleNameError');
+                if (err) err.textContent = '';
+            }
+
+            function showRoleFieldErrors(errors) {
+                clearRoleFieldErrors();
+                if (errors && errors.name && errors.name.length) {
+                    document.getElementById('roleName')?.classList.add('is-invalid');
+                    const err = document.getElementById('roleNameError');
+                    if (err) err.textContent = errors.name[0];
+                }
+            }
+
             function resetRoleForm() {
                 document.getElementById('roleId').value = '';
                 document.getElementById('roleForm')?.reset();
                 document.getElementById('roleStatus').value = 'active';
                 document.getElementById('roleModalTitle').textContent = 'Add Role';
+                clearRoleFieldErrors();
                 document.querySelectorAll('.role-assignable-cb').forEach(function(cb) {
                     cb.checked = false;
                     cb.disabled = false;
                 });
             }
+
+            document.getElementById('roleName')?.addEventListener('input', clearRoleFieldErrors);
 
             function openAddModal() {
                 resetRoleForm();
@@ -408,6 +430,7 @@
                 document.querySelectorAll('.role-assignable-cb:checked').forEach(function(cb) {
                     fd.append('assignable_role_ids[]', cb.value);
                 });
+                clearRoleFieldErrors();
                 try {
                     let data;
                     if (id) {
@@ -419,6 +442,9 @@
                     await AdminAjax.success(data.message || 'Role saved.');
                     window.location.reload();
                 } catch (e) {
+                    if (e.errors) {
+                        showRoleFieldErrors(e.errors);
+                    }
                     await AdminAjax.error(e.message);
                 }
             });

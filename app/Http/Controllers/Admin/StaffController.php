@@ -216,7 +216,7 @@ class StaffController extends AdminController
                 'max:150',
                 Rule::unique('users', 'email')->ignore($staff?->user_id),
             ],
-            'phone' => ['nullable', 'string', 'max:15'],
+            'phone' => ['nullable', 'string', 'regex:/^[0-9]{10,15}$/'],
             'designation' => ['nullable', 'string', 'max:100'],
             'address' => ['nullable', 'string', 'max:1000'],
             'city' => ['nullable', 'string', 'max:100'],

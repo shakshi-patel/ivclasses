@@ -36,16 +36,6 @@
                     </div>
                 @endif
 
-                @if ($isBypassMode)
-                    <div class="alert alert-info d-flex align-items-center mt-4 mb-0" role="alert">
-                        <i class="bx bx-info-circle me-2 fs-5"></i>
-                        <div>
-                            <strong>Development mode:</strong> payments are bypassed automatically.
-                            Set <code>BILLING_DRIVER=razorpay</code> or <code>stripe</code> in <code>.env</code> when your gateway accounts are ready.
-                        </div>
-                    </div>
-                @endif
-
                 <div class="row mt-4 g-4">
                     <div class="col-lg-5">
                         <div class="admin-detail-block h-100">
@@ -60,34 +50,50 @@
                             @elseif ($institute->trial_ends_at)
                                 <p class="mb-1"><strong>Trial ends:</strong> {{ $institute->trial_ends_at->format('d M Y') }}</p>
                             @endif
-                            <p class="mb-0 text-muted" style="font-size: 0.88rem;">
-                                Gateway: {{ strtoupper($gatewayDriver) }}
-                            </p>
 
                             <hr>
                             <h6 class="mb-2">Plan usage</h6>
+                            @php
+                                $usageRows = [
+                                    [
+                                        'label' => 'Branches',
+                                        'used' => $limits['branches_used'] ?? 0,
+                                        'max' => $limits['max_branches'] ?? null,
+                                        'plan' => $limits['plan_max_branches'] ?? null,
+                                        'override' => $limits['max_branches_override'] ?? null,
+                                    ],
+                                    [
+                                        'label' => 'Students',
+                                        'used' => $limits['students_used'] ?? 0,
+                                        'max' => $limits['max_students'] ?? null,
+                                        'plan' => $limits['plan_max_students'] ?? null,
+                                        'override' => $limits['max_students_override'] ?? null,
+                                    ],
+                                    [
+                                        'label' => 'Staff',
+                                        'used' => $limits['staff_used'] ?? 0,
+                                        'max' => $limits['max_staff'] ?? null,
+                                        'plan' => $limits['plan_max_staff'] ?? null,
+                                        'override' => $limits['max_staff_override'] ?? null,
+                                    ],
+                                ];
+                            @endphp
                             <ul class="mb-0 ps-3" style="font-size: 0.9rem;">
-                                <li>Branches: {{ $limits['branches_used'] ?? 0 }}
-                                    @if (! is_null($limits['max_branches'] ?? null))
-                                        / {{ $limits['max_branches'] }}
-                                    @else
-                                        / Unlimited
-                                    @endif
-                                </li>
-                                <li>Students: {{ $limits['students_used'] ?? 0 }}
-                                    @if (! is_null($limits['max_students'] ?? null))
-                                        / {{ $limits['max_students'] }}
-                                    @else
-                                        / Unlimited
-                                    @endif
-                                </li>
-                                <li>Staff: {{ $limits['staff_used'] ?? 0 }}
-                                    @if (! is_null($limits['max_staff'] ?? null))
-                                        / {{ $limits['max_staff'] }}
-                                    @else
-                                        / Unlimited
-                                    @endif
-                                </li>
+                                @foreach ($usageRows as $row)
+                                    <li>
+                                        {{ $row['label'] }}: {{ $row['used'] }}
+                                        @if (is_null($row['max']))
+                                            / Unlimited
+                                        @else
+                                            / {{ $row['max'] }}
+                                            @if (! is_null($row['override']))
+                                                <span class="text-muted">
+                                                    (custom limit; plan {{ is_null($row['plan']) ? 'Unlimited' : $row['plan'] }})
+                                                </span>
+                                            @endif
+                                        @endif
+                                    </li>
+                                @endforeach
                             </ul>
                         </div>
                     </div>
@@ -164,7 +170,12 @@
                                             <td>{{ ucfirst($payment->billing_cycle) }}</td>
                                             <td>₹{{ number_format($payment->amount, 2) }}</td>
                                             <td>{{ ucfirst($payment->status->value) }}</td>
-                                            <td>{{ strtoupper($payment->gateway) }}</td>
+                                            <td>
+                                                @php
+                                                    $gw = strtolower((string) $payment->gateway);
+                                                @endphp
+                                                {{ $gw === 'bypass' || $gw === '' ? '—' : strtoupper($payment->gateway) }}
+                                            </td>
                                             <td>{{ $payment->paid_at?->format('d M Y H:i') ?? '—' }}</td>
                                         </tr>
                                     @endforeach

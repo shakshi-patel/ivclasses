@@ -127,11 +127,11 @@ class SettingsController extends AdminController implements HasMiddleware
 
         try {
             Mail::raw(
-                'IV Classes SMTP test — if you received this, admin email settings are working.',
+                config('brand.name').' SMTP test — if you received this, admin email settings are working.',
                 function ($message) use ($validated) {
                     $message
                         ->to($validated['test_email'])
-                        ->subject('IV Classes — SMTP test');
+                        ->subject(config('brand.name').' — SMTP test');
                 }
             );
 

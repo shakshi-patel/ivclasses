@@ -48,11 +48,11 @@ class EmailTemplateRegistry
                     'security_note_html' => 'Pre-built security / temp-password note HTML',
                     'forgot_password_url' => 'Forgot password page URL',
                 ],
-                'default_subject' => 'Your IV Classes login details — {{institute_name}}',
+                'default_subject' => 'Your Class Flow login details — {{institute_name}}',
                 'default_body' => <<<'HTML'
 <div style="font-family: Arial, Helvetica, sans-serif; color: #1f2926; line-height: 1.6; padding: 24px; background: #f7f8f7;">
   <div style="max-width: 560px; margin: 0 auto; background: #ffffff; border-radius: 12px; padding: 28px 24px; border: 1px solid #e6ebe9;">
-    <h2 style="margin: 0 0 8px; color: #0f5c4d;">Welcome to IV Classes</h2>
+    <h2 style="margin: 0 0 8px; color: #0f5c4d;">Welcome to Class Flow</h2>
     <p style="margin: 0 0 18px; color: #5b6661;">
       Your institute <strong style="color: #1f2926;">{{institute_name}}</strong>
       is ready. Below are the logins created for you.
@@ -69,9 +69,9 @@ class EmailTemplateRegistry
     {{branch_logins_html}}
     {{security_note_html}}
     <p style="margin: 18px 0 0; color: #5b6661; font-size: 13px;">
-      If you did not expect this email, ignore it or contact IV Classes support.
+      If you did not expect this email, ignore it or contact Class Flow support.
     </p>
-    <p style="margin: 12px 0 0; font-weight: 700; color: #0f5c4d;">IV Classes</p>
+    <p style="margin: 12px 0 0; font-weight: 700; color: #0f5c4d;">Class Flow</p>
   </div>
 </div>
 HTML,
@@ -86,14 +86,14 @@ HTML,
                     'otp' => '6-digit verification code',
                     'expires_minutes' => 'Minutes until the code expires',
                 ],
-                'default_subject' => 'Your IV Classes verification code: {{otp}}',
+                'default_subject' => 'Your Class Flow verification code: {{otp}}',
                 'default_body' => <<<'HTML'
 <div style="font-family: Arial, Helvetica, sans-serif; color: #1f2926; line-height: 1.6; padding: 24px; background: #f7f8f7;">
   <div style="max-width: 560px; margin: 0 auto; background: #ffffff; border-radius: 12px; padding: 28px 24px; border: 1px solid #e6ebe9;">
     <h2 style="margin: 0 0 8px; color: #0f5c4d;">Verify your email</h2>
     <p style="margin: 0 0 18px; color: #5b6661;">
       Hi {{admin_name}}, use the code below to verify
-      <strong style="color: #1f2926;">{{institute_name}}</strong> and activate your IV Classes trial.
+      <strong style="color: #1f2926;">{{institute_name}}</strong> and activate your Class Flow trial.
     </p>
     <div style="margin-bottom: 18px; padding: 20px 16px; border-radius: 10px; background: #f3faf7; border: 1px solid #d5ebe3; text-align: center;">
       <p style="margin: 0 0 10px; font-weight: 700; color: #0f5c4d; font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em;">Your verification code</p>
@@ -102,13 +102,13 @@ HTML,
     <div style="margin: 0 0 8px; padding: 12px 14px; border-radius: 10px; background: #fff5f5; border: 1px solid #f0c9c9;">
       <p style="margin: 0; font-size: 14px; color: #9b2c2c;">
         <strong>Important:</strong> This code expires in {{expires_minutes}} minutes.
-        Do not share it with anyone — IV Classes staff will never ask for it.
+        Do not share it with anyone — Class Flow staff will never ask for it.
       </p>
     </div>
     <p style="margin: 18px 0 0; color: #5b6661; font-size: 13px;">
       If you did not request this, you can ignore this email.
     </p>
-    <p style="margin: 12px 0 0; font-weight: 700; color: #0f5c4d;">IV Classes</p>
+    <p style="margin: 12px 0 0; font-weight: 700; color: #0f5c4d;">Class Flow</p>
   </div>
 </div>
 HTML,
@@ -124,11 +124,11 @@ HTML,
                     'time_label' => 'Preferred time label',
                     'timezone' => 'Timezone',
                 ],
-                'default_subject' => 'We received your IV Classes demo request',
+                'default_subject' => 'We received your Class Flow demo request',
                 'default_body' => <<<'HTML'
 <div style="font-family: Arial, sans-serif; color: #1f2926; line-height: 1.6; padding: 24px;">
   <h2 style="margin-bottom: 8px; color: #0f5c4d;">We received your demo request</h2>
-  <p>Thanks for booking a demo with IV Classes. Our team will review this slot and confirm shortly.</p>
+  <p>Thanks for booking a demo with Class Flow. Our team will review this slot and confirm shortly.</p>
   <p>
     <strong>Inquiry Code:</strong> {{inquiry_code}}<br>
     <strong>Institute:</strong> {{institute_name}}<br>
@@ -137,7 +137,7 @@ HTML,
     <strong>Timezone:</strong> {{timezone}}
   </p>
   <p style="color: #5b6661;">You will get another email once the demo is confirmed by our team, with the Google Meet link.</p>
-  <p>IV Classes</p>
+  <p>Class Flow</p>
 </div>
 HTML,
             ],
@@ -196,11 +196,11 @@ HTML,
                     'google_meet_link' => 'Meet link',
                     'google_meet_html' => 'Optional Meet HTML block',
                 ],
-                'default_subject' => 'Your IV Classes demo is confirmed',
+                'default_subject' => 'Your Class Flow demo is confirmed',
                 'default_body' => <<<'HTML'
 <div style="font-family: Arial, sans-serif; color: #1f2926; line-height: 1.6; padding: 24px;">
   <h2 style="margin-bottom: 8px; color: #0f5c4d;">Your demo is confirmed</h2>
-  <p>Great news — our team has confirmed your IV Classes demo. Please join using the Google Meet link below at the scheduled time.</p>
+  <p>Great news — our team has confirmed your Class Flow demo. Please join using the Google Meet link below at the scheduled time.</p>
   <p>
     <strong>Inquiry Code:</strong> {{inquiry_code}}<br>
     <strong>Institute:</strong> {{institute_name}}<br>
@@ -210,7 +210,7 @@ HTML,
   </p>
   {{google_meet_html}}
   <p>We look forward to speaking with you.</p>
-  <p>IV Classes</p>
+  <p>Class Flow</p>
 </div>
 HTML,
             ],
@@ -224,18 +224,18 @@ HTML,
                     'time_label' => 'Requested time',
                     'book_demo_url' => 'Book another demo URL',
                 ],
-                'default_subject' => 'Update on your IV Classes demo request',
+                'default_subject' => 'Update on your Class Flow demo request',
                 'default_body' => <<<'HTML'
 <div style="font-family: Arial, sans-serif; color: #1f2926; line-height: 1.6; padding: 24px;">
   <h2 style="margin-bottom: 8px; color: #0f5c4d;">Update on your demo request</h2>
-  <p>Thank you for your interest in IV Classes. Unfortunately we could not confirm the slot below. Please book another time that works for you.</p>
+  <p>Thank you for your interest in Class Flow. Unfortunately we could not confirm the slot below. Please book another time that works for you.</p>
   <p>
     <strong>Inquiry Code:</strong> {{inquiry_code}}<br>
     <strong>Requested Date:</strong> {{date_label}}<br>
     <strong>Requested Time:</strong> {{time_label}}
   </p>
   <p><a href="{{book_demo_url}}" style="color: #0f5c4d; font-weight: 700;">Book another demo slot</a></p>
-  <p>IV Classes</p>
+  <p>Class Flow</p>
 </div>
 HTML,
             ],

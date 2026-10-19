@@ -40,6 +40,23 @@ class SubjectController extends AdminController
         $this->ensureCan('subject.add');
 
         $validated = $this->validateSubject($request);
+
+        $trashed = Subject::withTrashed()
+            ->where('institute_id', $validated['institute_id'])
+            ->where('name', $validated['name'])
+            ->whereNotNull('deleted_at')
+            ->first();
+
+        if ($trashed) {
+            $trashed->restore();
+            $trashed->update($validated);
+
+            return Ajax::success(
+                'Subject restored.',
+                $trashed->fresh()->load('institute:id,name')
+            );
+        }
+
         $subject = Subject::query()->create($validated);
         $subject->load('institute:id,name');
 

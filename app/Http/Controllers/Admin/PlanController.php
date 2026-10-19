@@ -121,7 +121,7 @@ class PlanController extends AdminController
             'name' => ['required', 'string', 'max:120'],
             'description' => ['nullable', 'string', 'max:1000'],
             'price_monthly' => ['required', 'numeric', 'min:0'],
-            'price_yearly' => ['required', 'numeric', 'min:0'],
+            'price_yearly' => ['required', 'numeric', 'min:0', 'gte:price_monthly'],
             'currency' => ['nullable', 'string', 'size:3'],
             'trial_days' => ['nullable', 'integer', 'min:0', 'max:365'],
             'max_branches' => ['nullable', 'integer', 'min:1'],
@@ -135,6 +135,8 @@ class PlanController extends AdminController
             'is_public' => ['sometimes', 'boolean'],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:9999'],
             'status' => ['required', Rule::in(['active', 'inactive'])],
+        ], [
+            'price_yearly.gte' => 'Yearly price must be greater than or equal to monthly price.',
         ]);
 
         $modules = ($data['modules_mode'] ?? 'selected') === 'all'

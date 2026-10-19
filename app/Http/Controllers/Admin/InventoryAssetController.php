@@ -143,7 +143,7 @@ class InventoryAssetController extends AdminController
             ],
             'name' => ['required', 'string', 'max:150'],
             'quantity' => ['required', 'integer', 'min:1'],
-            'purchase_date' => ['required', 'date'],
+            'purchase_date' => ['required', 'date', 'before_or_equal:today'],
             'purchase_amount' => ['required', 'numeric', 'min:0'],
             'status' => ['required', Rule::in(array_keys(InventoryAsset::STATUSES))],
             'note' => ['nullable', 'string', 'max:1000'],

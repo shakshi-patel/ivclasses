@@ -22,7 +22,7 @@ class DemoClientReceivedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'We received your IV Classes demo request',
+            subject: 'We received your Class Flow demo request',
         );
     }
 

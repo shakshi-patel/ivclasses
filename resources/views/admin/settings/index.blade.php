@@ -445,13 +445,13 @@
                                     <div class="col-md-6">
                                         <label class="form-label">Meta title</label>
                                         <input type="text" class="form-control" name="meta_title"
-                                            value="{{ old('meta_title', $settings->get('website.meta_title', 'IV Classes — Smart Classroom Management')) }}"
+                                            value="{{ old('meta_title', $settings->get('website.meta_title', 'Class Flow — Smart Classroom Management')) }}"
                                             placeholder="Page title for search engines">
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Meta description</label>
                                         <textarea class="form-control" name="meta_description" rows="2"
-                                            placeholder="Short description for search engines">{{ old('meta_description', $settings->get('website.meta_description', 'Manage classes, fees, attendance and more with IV Classes.')) }}</textarea>
+                                            placeholder="Short description for search engines">{{ old('meta_description', $settings->get('website.meta_description', 'Manage classes, fees, attendance and more with Class Flow.')) }}</textarea>
                                     </div>
                                 </div>
                             </div>
@@ -468,7 +468,7 @@
                                     <div class="col-12">
                                         <label class="form-label">Footer description</label>
                                         <textarea class="form-control" name="footer_description" rows="3"
-                                            placeholder="Short about text shown in the website footer">{{ old('footer_description', $settings->get('website.footer_description', 'IV Classes helps coaching institutes run demos, batches, fees and day-to-day operations from one place.')) }}</textarea>
+                                            placeholder="Short about text shown in the website footer">{{ old('footer_description', $settings->get('website.footer_description', 'Class Flow helps coaching institutes run demos, batches, fees and day-to-day operations from one place.')) }}</textarea>
                                     </div>
                                 </div>
                             </div>

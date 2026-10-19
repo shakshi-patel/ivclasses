@@ -12,7 +12,7 @@ return [
 
     'gap_minutes' => (int) env('DEMO_GAP_MINUTES', 15),
 
-    'event_title_prefix' => env('DEMO_EVENT_TITLE_PREFIX', 'IV Classes Demo'),
+    'event_title_prefix' => env('DEMO_EVENT_TITLE_PREFIX', 'Class Flow Demo'),
 
     'inquiry_code_prefix' => env('DEMO_INQUIRY_CODE_PREFIX', 'INQ'),
 

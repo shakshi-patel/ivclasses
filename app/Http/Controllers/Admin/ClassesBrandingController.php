@@ -37,7 +37,7 @@ class ClassesBrandingController extends AdminController
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:150'],
             'email' => ['required', 'email', 'max:150'],
-            'phone' => ['nullable', 'string', 'max:15'],
+            'phone' => ['nullable', 'string', 'regex:/^[0-9]{10,15}$/'],
             'gstin' => ['nullable', 'string', 'max:30'],
             'address' => ['nullable', 'string', 'max:1000'],
             'city' => ['nullable', 'string', 'max:100'],

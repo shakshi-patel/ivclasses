@@ -1,4 +1,4 @@
-/* IVClasses Marketing Site — shared interactions */
+/* ClassFlow Marketing Site — shared interactions */
 (function () {
     "use strict";
 

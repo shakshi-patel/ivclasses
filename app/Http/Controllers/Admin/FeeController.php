@@ -23,7 +23,8 @@ class FeeController extends AdminController
 {
     public function __construct(
         protected FeeService $feeService
-    ) {}
+    ) {
+    }
 
     public function index(Request $request): View
     {
@@ -39,25 +40,25 @@ class FeeController extends AdminController
                 'invoice.enrollment.batch.standard:id,name',
                 'collector:id,name',
             ])
-            ->when(auth()->user() && ! auth()->user()->isPlatformUser(), function ($q) {
-                $q->whereHas('student', fn ($sq) => $sq->where('institute_id', auth()->user()->institute_id));
+            ->when(auth()->user() && !auth()->user()->isPlatformUser(), function ($q) {
+                $q->whereHas('student', fn($sq) => $sq->where('institute_id', auth()->user()->institute_id));
             })
             ->when(BranchScope::for()->isRestricted(), function ($q) {
                 $ids = BranchScope::for()->branchIds();
-                $q->whereHas('student', fn ($sq) => $sq->whereIn('branch_id', $ids));
+                $q->whereHas('student', fn($sq) => $sq->whereIn('branch_id', $ids));
             })
             ->when($this->isPlatform() && $request->filled('institute_id'), function ($q) use ($request) {
-                $q->whereHas('student', fn ($sq) => $sq->where('institute_id', (int) $request->input('institute_id')));
+                $q->whereHas('student', fn($sq) => $sq->where('institute_id', (int) $request->input('institute_id')));
             })
             ->when($request->filled('branch_id'), function ($q) use ($request) {
-                $q->whereHas('student', fn ($sq) => $sq->where('branch_id', (int) $request->input('branch_id')));
+                $q->whereHas('student', fn($sq) => $sq->where('branch_id', (int) $request->input('branch_id')));
             })
             ->when($request->filled('batch_id'), function ($q) use ($request) {
-                $q->whereHas('invoice.enrollment', fn ($eq) => $eq->where('batch_id', (int) $request->input('batch_id')));
+                $q->whereHas('invoice.enrollment', fn($eq) => $eq->where('batch_id', (int) $request->input('batch_id')));
             })
-            ->when($request->filled('payment_method'), fn ($q) => $q->where('payment_method', $request->input('payment_method')))
-            ->when($request->filled('start_date'), fn ($q) => $q->whereDate('payment_date', '>=', $request->input('start_date')))
-            ->when($request->filled('end_date'), fn ($q) => $q->whereDate('payment_date', '<=', $request->input('end_date')))
+            ->when($request->filled('payment_method'), fn($q) => $q->where('payment_method', $request->input('payment_method')))
+            ->when($request->filled('start_date'), fn($q) => $q->whereDate('payment_date', '>=', $request->input('start_date')))
+            ->when($request->filled('end_date'), fn($q) => $q->whereDate('payment_date', '<=', $request->input('end_date')))
             ->latest('payment_date')
             ->latest('id')
             ->get();
@@ -168,20 +169,20 @@ class FeeController extends AdminController
         }
 
         if ($request->filled('batch_id')) {
-            $query->whereHas('enrollment', fn ($q) => $q->where('batch_id', (int) $request->input('batch_id')));
+            $query->whereHas('enrollment', fn($q) => $q->where('batch_id', (int) $request->input('batch_id')));
         }
 
         if ($request->filled('follow_up_date')) {
-            $query->whereHas('latestFollowUp', fn ($q) => $q->whereDate('next_follow_up_at', $request->input('follow_up_date')));
+            $query->whereHas('latestFollowUp', fn($q) => $q->whereDate('next_follow_up_at', $request->input('follow_up_date')));
         }
 
         if ($request->input('status') === 'complete') {
             $query->where(function ($q) {
                 $q->whereDoesntHave('latestFollowUp')
-                    ->orWhereHas('latestFollowUp', fn ($fq) => $fq->where('status', 'complete'));
+                    ->orWhereHas('latestFollowUp', fn($fq) => $fq->where('status', 'complete'));
             });
         } elseif ($request->input('status') === 'pending') {
-            $query->whereHas('latestFollowUp', fn ($q) => $q->where('status', 'pending'));
+            $query->whereHas('latestFollowUp', fn($q) => $q->where('status', 'pending'));
         }
 
         $this->applyInstituteFilter($query, $request);
@@ -223,7 +224,7 @@ class FeeController extends AdminController
 
         if ($request->ajax() || $request->wantsJson()) {
             return Ajax::success('OK', [
-                'title' => 'Fee Receipt — '.($payment->receipt_no ?? ('#'.$payment->id)),
+                'title' => 'Fee Receipt — ' . ($payment->receipt_no ?? ('#' . $payment->id)),
                 'html' => view('admin.fees.partials.receipt_card', compact('payment'))->render(),
                 'export_url' => route('admin.fees.receipt_pdf', $payment),
             ]);
@@ -238,8 +239,8 @@ class FeeController extends AdminController
         $this->loadFeeReceiptData($payment);
         $this->assertStudentVisible((int) $payment->student_id);
 
-        $safeName = preg_replace('/[^A-Za-z0-9_\-]+/', '_', $payment->receipt_no ?: ('fee-'.$payment->id)) ?: 'fee-receipt';
-        $filename = $safeName.'-'.now()->format('Ymd_His').'.pdf';
+        $safeName = preg_replace('/[^A-Za-z0-9_\-]+/', '_', $payment->receipt_no ?: ('fee-' . $payment->id)) ?: 'fee-receipt';
+        $filename = $safeName . '-' . now()->format('Ymd_His') . '.pdf';
 
         return Pdf::loadView('admin.print.pdf.fee_receipt', compact('payment'))
             ->setPaper('a4', 'portrait')
@@ -282,9 +283,9 @@ class FeeController extends AdminController
 
         $user = auth()->user();
         $instituteId = null;
-        if ($user && ! $user->isPlatformUser()) {
+        if ($user && !$user->isPlatformUser()) {
             $instituteId = (int) $user->institute_id;
-        } elseif (! empty($validated['institute_id'])) {
+        } elseif (!empty($validated['institute_id'])) {
             $instituteId = (int) $validated['institute_id'];
         }
 
@@ -302,16 +303,16 @@ class FeeController extends AdminController
             $query->where('institute_id', $instituteId);
         }
 
-        if (! empty($validated['branch_id'])) {
+        if (!empty($validated['branch_id'])) {
             $query->where('branch_id', (int) $validated['branch_id']);
         }
 
-        if (! empty($validated['batch_ids'])) {
+        if (!empty($validated['batch_ids'])) {
             $batchIds = array_map('intval', $validated['batch_ids']);
-            $query->whereHas('enrollment', fn ($q) => $q->whereIn('batch_id', $batchIds));
+            $query->whereHas('enrollment', fn($q) => $q->whereIn('batch_id', $batchIds));
         }
 
-        if (! empty($validated['start_date']) || ! empty($validated['end_date'])) {
+        if (!empty($validated['start_date']) || !empty($validated['end_date'])) {
             $start = $validated['start_date'] ?? '1900-01-01';
             $end = $validated['end_date'] ?? '2100-12-31';
             $query->where(function ($q) use ($start, $end) {
@@ -335,12 +336,12 @@ class FeeController extends AdminController
             ? (Institute::query()->whereKey($instituteId)->value('name') ?? config('app.name'))
             : config('app.name');
 
-        $branchName = ! empty($validated['branch_id'])
+        $branchName = !empty($validated['branch_id'])
             ? Branch::query()->whereKey((int) $validated['branch_id'])->value('name')
             : null;
 
         $batchLabel = null;
-        if (! empty($validated['batch_ids'])) {
+        if (!empty($validated['batch_ids'])) {
             $batchNames = Batch::query()
                 ->whereIn('id', array_map('intval', $validated['batch_ids']))
                 ->orderBy('name')
@@ -349,7 +350,7 @@ class FeeController extends AdminController
             $batchLabel = $batchNames ? implode(', ', $batchNames) : null;
         }
 
-        $filename = 'fees-follow-up-'.now()->format('Ymd_His').'.pdf';
+        $filename = 'fees-follow-up-' . now()->format('Ymd_His') . '.pdf';
 
         return Pdf::loadView('admin.print.pdf.fees_follow_up', compact(
             'invoices',
@@ -367,7 +368,7 @@ class FeeController extends AdminController
         $query = FeeInvoice::query();
 
         $user = auth()->user();
-        if ($user && ! $user->isPlatformUser()) {
+        if ($user && !$user->isPlatformUser()) {
             $query->where('institute_id', $user->institute_id);
         }
 
@@ -382,7 +383,7 @@ class FeeController extends AdminController
     protected function instituteOptions()
     {
         $user = auth()->user();
-        if ($user && ! $user->isPlatformUser()) {
+        if ($user && !$user->isPlatformUser()) {
             return Institute::query()->where('id', $user->institute_id)->get(['id', 'name']);
         }
 
@@ -392,9 +393,9 @@ class FeeController extends AdminController
     protected function branchOptions(?int $instituteId = null)
     {
         $user = auth()->user();
-        $instituteId ??= $user && ! $user->isPlatformUser() ? $user->institute_id : null;
+        $instituteId ??= $user && !$user->isPlatformUser() ? $user->institute_id : null;
 
-        if (! $instituteId) {
+        if (!$instituteId) {
             return collect();
         }
 
@@ -406,7 +407,7 @@ class FeeController extends AdminController
         $student = Student::query()->findOrFail($studentId);
         $user = auth()->user();
 
-        if ($user && ! $user->isPlatformUser() && (int) $student->institute_id !== (int) $user->institute_id) {
+        if ($user && !$user->isPlatformUser() && (int) $student->institute_id !== (int) $user->institute_id) {
             abort(404);
         }
 
@@ -418,7 +419,7 @@ class FeeController extends AdminController
     protected function assertInvoiceVisible(FeeInvoice $invoice): void
     {
         $user = auth()->user();
-        if ($user && ! $user->isPlatformUser() && (int) $invoice->institute_id !== (int) $user->institute_id) {
+        if ($user && !$user->isPlatformUser() && (int) $invoice->institute_id !== (int) $user->institute_id) {
             abort(404);
         }
 
@@ -444,4 +445,5 @@ class FeeController extends AdminController
 
         abort(403, 'Unauthorized.');
     }
+
 }

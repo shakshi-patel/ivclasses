@@ -20,7 +20,7 @@ class StoreBookDemoRequest extends FormRequest
             'institute_name' => ['required', 'string', 'max:150'],
             'city' => ['required', 'string', 'max:100'],
             'state' => ['nullable', 'string', 'max:100'],
-            'contact_no' => ['required', 'string', 'max:15'],
+            'contact_no' => ['required', 'string', 'regex:/^[0-9]{10,15}$/'],
             'email' => ['required', 'email', 'max:150'],
             'pincode' => ['nullable', 'string', 'max:10'],
             'branch_count' => ['nullable', 'integer', 'min:1'],

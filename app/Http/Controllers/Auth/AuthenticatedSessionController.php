@@ -87,7 +87,7 @@ class AuthenticatedSessionController extends Controller
                 'portal' => $portal,
                 'formAction' => route('login.platform.store'),
                 'pageTitle' => 'Platform sign in',
-                'kicker' => 'IV Classes Platform',
+                'kicker' => 'Class Flow Platform',
                 'heading' => 'Platform console',
                 'lead' => 'Super admin and developer access only.',
                 'visualTitleLines' => ['Operate the', 'entire network.'],

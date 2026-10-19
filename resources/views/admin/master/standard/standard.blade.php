@@ -140,6 +140,7 @@
                                     <option value="{{ $inst->id }}">{{ $inst->name }}</option>
                                 @endforeach
                             </select>
+                            <div class="invalid-feedback" data-field-error="institute_id"></div>
                         </div>
                     @else
                         <input type="hidden" id="standardInstitute" value="{{ $defaultInstituteId }}">
@@ -147,10 +148,12 @@
                     <div class="mb-3">
                         <label class="form-label fw-semibold" for="standardName">Standard Name <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="standardName" placeholder="e.g. 10th" required>
+                        <div class="invalid-feedback" data-field-error="name"></div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold" for="standardSort">Sort Order</label>
                         <input type="number" class="form-control" id="standardSort" value="0" min="0">
+                        <div class="invalid-feedback" data-field-error="sort_order"></div>
                     </div>
                     <div class="mb-0">
                         <label class="form-label fw-semibold" for="standardStatus">Status <span class="text-danger">*</span></label>
@@ -158,8 +161,9 @@
                             <option value="active">Active</option>
                             <option value="inactive">Inactive</option>
                         </select>
+                        <div class="invalid-feedback" data-field-error="status"></div>
                     </div>
-                    <div class="text-danger small mt-2" id="standardFormError" hidden></div>
+                    <div class="text-danger small mt-2" id="standardFormError" data-form-error hidden></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -193,6 +197,13 @@
                 }
             }
 
+            const fieldMap = {
+                institute_id: '#standardInstitute',
+                name: '#standardName',
+                sort_order: '#standardSort',
+                status: '#standardStatus'
+            };
+
             function resetForm() {
                 document.getElementById('standardId').value = '';
                 setInstituteValue(isPlatform ? '' : defaultInstituteId);
@@ -200,9 +211,7 @@
                 document.getElementById('standardSort').value = '0';
                 document.getElementById('standardStatus').value = 'active';
                 document.getElementById('standardModalTitle').textContent = 'Add Standard';
-                const err = document.getElementById('standardFormError');
-                err.hidden = true;
-                err.textContent = '';
+                AdminAjax.clearFieldErrors(modalEl);
             }
 
             function bindRowActions(tr) {
@@ -212,23 +221,24 @@
             }
 
             function buildRow(row, sr) {
+                const esc = AdminAjax.escapeHtml;
                 const active = row.status === 'active';
                 const tr = document.createElement('tr');
                 tr.dataset.id = row.id;
                 let html = '<td data-role="sr">' + sr + '</td>';
                 if (isPlatform) {
-                    html += '<td>' + (row.institute?.name || '—') + '</td>';
+                    html += '<td>' + esc(row.institute?.name || '—') + '</td>';
                 }
-                html += '<td class="fw-semibold">' + (row.name || '') + '</td>';
-                html += '<td>' + (row.sort_order ?? 0) + '</td>';
+                html += '<td class="fw-semibold">' + esc(row.name || '') + '</td>';
+                html += '<td>' + esc(row.sort_order ?? 0) + '</td>';
                 html += '<td><span class="admin-status-pill ' + (active ? 'is-active' : 'is-muted') + '" data-role="status-pill">' +
                     (active ? 'Active' : 'Inactive') + '</span></td>';
                 html += '<td class="text-center">';
                 if (canEdit) {
                     html += '<button type="button" class="admin-action-icon btn-edit-standard" title="Edit"' +
-                        ' data-id="' + row.id + '" data-institute-id="' + (row.institute_id || '') + '"' +
-                        ' data-name="' + (row.name || '').replace(/"/g, '&quot;') + '"' +
-                        ' data-sort="' + (row.sort_order ?? 0) + '" data-status="' + row.status + '">' +
+                        ' data-id="' + esc(row.id) + '" data-institute-id="' + esc(row.institute_id || '') + '"' +
+                        ' data-name="' + esc(row.name || '') + '"' +
+                        ' data-sort="' + esc(row.sort_order ?? 0) + '" data-status="' + esc(row.status) + '">' +
                         '<i class="bx bx-pencil"></i></button>';
                 }
                 if (canStatus) {
@@ -261,6 +271,15 @@
             async function onToggle(e) {
                 const btn = e.currentTarget;
                 const tr = btn.closest('tr');
+                const isActive = btn.dataset.active === '1';
+                const ok = await AdminAjax.confirm({
+                    title: isActive ? 'Deactivate standard?' : 'Activate standard?',
+                    text: isActive
+                        ? 'This standard will be marked inactive.'
+                        : 'This standard will be marked active again.',
+                    confirmText: isActive ? 'Yes, deactivate' : 'Yes, activate'
+                });
+                if (!ok) return;
                 try {
                     const data = await AdminAjax.post(baseUrl + '/' + btn.dataset.id + '/toggle-status');
                     const status = AdminAjax.statusFrom(data);
@@ -308,14 +327,25 @@
             });
 
 
+            ['standardName', 'standardSort', 'standardStatus', 'standardInstitute'].forEach(function(id) {
+                document.getElementById(id)?.addEventListener('input', function() {
+                    AdminAjax.clearFieldErrors(modalEl);
+                });
+                document.getElementById(id)?.addEventListener('change', function() {
+                    AdminAjax.clearFieldErrors(modalEl);
+                });
+            });
+
             document.getElementById('standardSaveBtn')?.addEventListener('click', async function() {
                 const id = document.getElementById('standardId').value;
                 const instituteId = document.getElementById('standardInstitute')?.value || '';
-                const err = document.getElementById('standardFormError');
-                err.hidden = true;
+                AdminAjax.clearFieldErrors(modalEl);
                 if (!instituteId) {
-                    err.hidden = false;
-                    err.textContent = 'Please select an institute.';
+                    AdminAjax.showFieldErrors(
+                        { institute_id: ['Please select an institute.'] },
+                        fieldMap,
+                        { root: modalEl, fallback: '#standardFormError' }
+                    );
                     return;
                 }
                 const payload = {
@@ -366,8 +396,18 @@
                         return;
                     }
                 } catch (e) {
-                    err.hidden = false;
-                    err.textContent = e.message;
+                    if (e.errors) {
+                        AdminAjax.showFieldErrors(e.errors, fieldMap, {
+                            root: modalEl,
+                            fallback: '#standardFormError'
+                        });
+                    } else {
+                        const err = document.getElementById('standardFormError');
+                        if (err) {
+                            err.hidden = false;
+                            err.textContent = e.message;
+                        }
+                    }
                 }
             });
         })();

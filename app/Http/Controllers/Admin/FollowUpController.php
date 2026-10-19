@@ -55,9 +55,17 @@ class FollowUpController extends AdminController
         $this->ensureCan('follow_up.add');
         $this->assertVisible($inquiry);
 
+        $inquiryDate = optional($inquiry->inquiry_date)->format('Y-m-d');
+
         $validated = $request->validate([
             'remark' => ['required', 'string', 'max:2000'],
-            'next_follow_up_at' => ['nullable', 'date'],
+            'next_follow_up_at' => array_values(array_filter([
+                'nullable',
+                'date',
+                $inquiryDate ? 'after_or_equal:'.$inquiryDate : null,
+            ])),
+        ], [
+            'next_follow_up_at.after_or_equal' => 'The follow-up date must be on or after the enquiry date.',
         ]);
 
         $followUp = $this->inquiryService->addFollowUp($inquiry, [

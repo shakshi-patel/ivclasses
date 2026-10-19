@@ -51,7 +51,7 @@
                         </span>
                         <h3 class="ivd-hero__title">{{ $greeting }}, <span>{{ $user?->name ?: 'Admin' }}</span></h3>
                         <p class="ivd-hero__subtitle">
-                            Here's how IV Classes is performing across all institutes today.
+                            Here's how Class Flow is performing across all institutes today.
                         </p>
                         <div class="ivd-hero__actions">
                             <a href="{{ route('admin.institutes.index') }}" class="ivd-btn ivd-btn--gold">

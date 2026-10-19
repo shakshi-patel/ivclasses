@@ -226,9 +226,9 @@ class ExamController extends AdminController
             'title' => ['required', 'string', 'max:200'],
             'exam_date' => ['required', 'date'],
             'start_time' => ['nullable', 'date_format:H:i'],
-            'end_time' => ['nullable', 'date_format:H:i'],
+            'end_time' => ['nullable', 'date_format:H:i', 'after:start_time'],
             'duration_label' => ['nullable', 'string', 'max:50'],
-            'total_marks' => ['required', 'numeric', 'min:0'],
+            'total_marks' => ['required', 'numeric', 'min:1'],
             'description' => ['nullable', 'string', 'max:5000'],
             'attachment' => [
                 (! $hasExistingFile && ! $request->boolean('remove_attachment')) ? 'nullable' : 'nullable',

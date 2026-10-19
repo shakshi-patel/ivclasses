@@ -40,6 +40,23 @@ class StandardController extends AdminController
         $this->ensureCan('standard.add');
 
         $validated = $this->validateStandard($request);
+
+        $trashed = Standard::withTrashed()
+            ->where('institute_id', $validated['institute_id'])
+            ->where('name', $validated['name'])
+            ->whereNotNull('deleted_at')
+            ->first();
+
+        if ($trashed) {
+            $trashed->restore();
+            $trashed->update($validated);
+
+            return Ajax::success(
+                'Standard restored.',
+                $trashed->fresh()->load('institute:id,name')
+            );
+        }
+
         $standard = Standard::query()->create($validated);
         $standard->load('institute:id,name');
 
@@ -61,6 +78,28 @@ class StandardController extends AdminController
     {
         $this->ensureCan('standard.delete');
         $this->assertVisible($standard);
+
+        $batchCount = $standard->batches()->count();
+        $studentCount = $standard->students()->count();
+        $inquiryCount = $standard->inquiries()->count();
+
+        if ($batchCount > 0 || $studentCount > 0 || $inquiryCount > 0) {
+            $parts = [];
+            if ($batchCount > 0) {
+                $parts[] = $batchCount.' batch'.($batchCount === 1 ? '' : 'es');
+            }
+            if ($studentCount > 0) {
+                $parts[] = $studentCount.' student'.($studentCount === 1 ? '' : 's');
+            }
+            if ($inquiryCount > 0) {
+                $parts[] = $inquiryCount.' inquir'.($inquiryCount === 1 ? 'y' : 'ies');
+            }
+
+            return $this->respondDestroyFailed(
+                $request,
+                'Cannot delete — this standard is used by '.implode(', ', $parts).'. Reassign them first.'
+            );
+        }
 
         $standard->delete();
 

@@ -13,7 +13,8 @@ class FeeService
 {
     public function __construct(
         protected IncomeExpenseService $incomeExpenseService
-    ) {}
+    ) {
+    }
     /**
      * Aggregated fee profile for student view (no invoice auto-create).
      *
@@ -39,7 +40,7 @@ class FeeService
             $due = round((float) $invoices->sum('due_amount'), 2);
         } else {
             $total = round((float) $student->enrollments->sum(
-                fn (StudentBatch $e) => max(0, (float) $e->total_fees - (float) ($e->discount ?? 0))
+                fn(StudentBatch $e) => max(0, (float) $e->total_fees - (float) ($e->discount ?? 0))
             ), 2);
             $paid = round((float) FeePayment::query()->where('student_id', $student->id)->sum('amount'), 2);
             $due = round(max(0, $total - $paid), 2);
@@ -53,7 +54,7 @@ class FeeService
             ->get();
 
         $followUps = FeeFollowUp::query()
-            ->whereHas('invoice', fn ($q) => $q->where('student_id', $student->id))
+            ->whereHas('invoice', fn($q) => $q->where('student_id', $student->id))
             ->with('creator:id,name')
             ->latest('follow_up_at')
             ->latest('id')
@@ -78,7 +79,7 @@ class FeeService
 
         $invoice = $this->resolveOrCreateInvoice($student, $enrollment);
         $invoice->load([
-            'payments' => fn ($q) => $q->with('collector:id,name')->latest('payment_date')->latest('id'),
+            'payments' => fn($q) => $q->with('collector:id,name')->latest('payment_date')->latest('id'),
         ]);
 
         $student->load(['parent.user', 'standard:id,name']);
@@ -111,7 +112,7 @@ class FeeService
                 'batch_id' => $enrollment->batch_id,
                 'batch_name' => $enrollment->batch?->name,
             ],
-            'payments' => $invoice->payments->map(fn (FeePayment $p) => [
+            'payments' => $invoice->payments->map(fn(FeePayment $p) => [
                 'id' => $p->id,
                 'amount' => (float) $p->amount,
                 'payment_date' => $p->payment_date?->format('d M Y'),
@@ -158,7 +159,7 @@ class FeeService
 
             $this->incomeExpenseService->createFromFeePayment($payment);
 
-            if (! empty($data['note'])) {
+            if (!empty($data['note'])) {
                 $this->addFollowUp($invoice, [
                     'remark' => $data['note'],
                     'next_follow_up_at' => null,
@@ -177,12 +178,17 @@ class FeeService
         return DB::transaction(function () use ($invoice, $data) {
             $nextAt = $data['next_follow_up_at'] ?? null;
 
+            // "Complete" means nothing more to chase: no dues left AND no next follow-up
+            // scheduled. A next date keeps it pending even if dues are cleared (e.g. a
+            // reminder), and outstanding dues always keep it pending regardless of the date.
+            $status = ((float) $invoice->due_amount > 0 || $nextAt) ? 'pending' : 'complete';
+
             $followUp = FeeFollowUp::query()->create([
                 'fee_invoice_id' => $invoice->id,
                 'follow_up_at' => $data['follow_up_at'] ?? now(),
                 'next_follow_up_at' => $nextAt,
                 'remark' => $data['remark'] ?? null,
-                'status' => $nextAt ? 'pending' : 'complete',
+                'status' => $status,
                 'created_by' => auth()->id(),
             ]);
 
@@ -231,7 +237,7 @@ class FeeService
             'branch_id' => $student->branch_id,
             'student_id' => $student->id,
             'student_batch_id' => $enrollment->id,
-            'title' => $enrollment->batch?->name ? $enrollment->batch->name.' Fees' : 'Batch Fees',
+            'title' => $enrollment->batch?->name ? $enrollment->batch->name . ' Fees' : 'Batch Fees',
             'total_amount' => $total,
             'discount' => $discount,
             'net_amount' => $net,
@@ -255,7 +261,7 @@ class FeeService
             'total_amount' => $total,
             'discount' => $discount,
             'net_amount' => $net,
-            'title' => $enrollment->batch?->name ? $enrollment->batch->name.' Fees' : $invoice->title,
+            'title' => $enrollment->batch?->name ? $enrollment->batch->name . ' Fees' : $invoice->title,
             'updated_by' => auth()->id(),
         ]);
 
@@ -308,12 +314,13 @@ class FeeService
     {
         return \App\Support\SequenceGenerator::forInstitute($instituteId, function () use ($instituteId) {
             $count = FeePayment::query()
-                ->whereHas('invoice', fn ($q) => $q->where('institute_id', $instituteId))
+                ->whereHas('invoice', fn($q) => $q->where('institute_id', $instituteId))
                 ->whereYear('created_at', now()->year)
                 ->count() + 1;
 
-            return 'RCP-'.str_pad((string) $instituteId, 3, '0', STR_PAD_LEFT)
-                .'-'.now()->format('Y').'-'.str_pad((string) $count, 4, '0', STR_PAD_LEFT);
+            return 'RCP-' . str_pad((string) $instituteId, 3, '0', STR_PAD_LEFT)
+                . '-' . now()->format('Y') . '-' . str_pad((string) $count, 4, '0', STR_PAD_LEFT);
         });
     }
+
 }

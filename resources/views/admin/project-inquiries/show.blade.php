@@ -252,7 +252,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold">Phone</label>
-                                        <input type="text" name="phone" class="form-control" maxlength="15" inputmode="numeric" data-phone-input
+                                        <input type="text" name="phone" class="form-control" maxlength="15" minlength="10" pattern="[0-9]{10,15}" inputmode="numeric" data-phone-input
                                             value="{{ old('phone', $inquiry->contact_no) }}">
                                     </div>
                                     <div class="col-md-6">
@@ -329,7 +329,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold">Branch phone</label>
-                                        <input type="text" class="form-control" data-name="phone" maxlength="15" inputmode="numeric" data-phone-input>
+                                        <input type="text" class="form-control" data-name="phone" maxlength="15" minlength="10" pattern="[0-9]{10,15}" inputmode="numeric" data-phone-input>
                                     </div>
                                     <div class="col-12">
                                         <label class="form-label fw-semibold">Branch address</label>

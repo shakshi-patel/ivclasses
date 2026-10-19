@@ -476,42 +476,152 @@ if (typeof $ !== 'undefined') {
     if (searchInput.length) {
       // Filter config
       var filterConfig = function (data) {
+        var list = Array.isArray(data) ? data : [];
         return function findMatches(q, cb) {
-          let matches;
-          matches = [];
-          data.filter(function (i) {
-            if (i.name.toLowerCase().startsWith(q.toLowerCase())) {
+          var matches = [];
+          var query = (q || '').toLowerCase();
+          list.forEach(function (i) {
+            if (!i || !i.name) return;
+            var name = String(i.name).toLowerCase();
+            if (name.startsWith(query) || name.includes(query)) {
               matches.push(i);
-            } else if (
-              !i.name.toLowerCase().startsWith(q.toLowerCase()) &&
-              i.name.toLowerCase().includes(q.toLowerCase())
-            ) {
-              matches.push(i);
-              matches.sort(function (a, b) {
-                return b.name < a.name ? 1 : -1;
-              });
-            } else {
-              return [];
             }
+          });
+          matches.sort(function (a, b) {
+            var an = String(a.name).toLowerCase();
+            var bn = String(b.name).toLowerCase();
+            var aStarts = an.startsWith(query) ? 0 : 1;
+            var bStarts = bn.startsWith(query) ? 0 : 1;
+            if (aStarts !== bStarts) return aStarts - bStarts;
+            return an < bn ? -1 : an > bn ? 1 : 0;
           });
           cb(matches);
         };
       };
 
-      // Search JSON
-      var searchJson = 'search-vertical.json'; // For vertical layout
-      if ($('#layout-menu').hasClass('menu-horizontal')) {
-        var searchJson = 'search-horizontal.json'; // For vertical layout
+      // Prefer Laravel-injected catalog; fall back to template JSON with a safe assets path.
+      var searchData = window.adminSearchData;
+      if (!searchData || !Array.isArray(searchData.pages)) {
+        var searchJson = $('#layout-menu').hasClass('menu-horizontal')
+          ? 'search-horizontal.json'
+          : 'search-vertical.json';
+        var base = typeof assetsPath === 'string' ? assetsPath : '';
+        if (base && !/\/$/.test(base)) base += '/';
+        searchData = $.ajax({
+          url: base + 'json/' + searchJson,
+          dataType: 'json',
+          async: false
+        }).responseJSON;
       }
-      // Search API AJAX call
-      var searchData = $.ajax({
-        url: assetsPath + 'json/' + searchJson, //? Use your own search api instead
-        dataType: 'json',
-        async: false
-      }).responseJSON;
+      searchData = searchData || {};
+      var searchPages = Array.isArray(searchData.pages) ? searchData.pages : [];
+      var searchFiles = Array.isArray(searchData.files) ? searchData.files : [];
+      var searchMembers = Array.isArray(searchData.members) ? searchData.members : [];
+
       // Init typeahead on searchInput
       searchInput.each(function () {
         var $this = $(this);
+        var datasets = [
+          {
+            name: 'pages',
+            display: 'name',
+            limit: 8,
+            source: filterConfig(searchPages),
+            templates: {
+              header: '<h6 class="suggestions-header text-primary mb-0 mx-3 mt-3 pb-2">Pages</h6>',
+              suggestion: function ({ url, icon, name }) {
+                return (
+                  '<a href="' +
+                  url +
+                  '">' +
+                  '<div>' +
+                  '<i class="bx ' +
+                  icon +
+                  ' me-2"></i>' +
+                  '<span class="align-middle">' +
+                  name +
+                  '</span>' +
+                  '</div>' +
+                  '</a>'
+                );
+              },
+              notFound:
+                '<div class="not-found px-3 py-2">' +
+                '<h6 class="suggestions-header text-primary mb-2">Pages</h6>' +
+                '<p class="py-2 mb-0"><i class="bx bx-error-circle bx-xs me-2"></i> No Results Found</p>' +
+                '</div>'
+            }
+          }
+        ];
+        if (searchFiles.length) {
+          datasets.push({
+            name: 'files',
+            display: 'name',
+            limit: 4,
+            source: filterConfig(searchFiles),
+            templates: {
+              header: '<h6 class="suggestions-header text-primary mb-0 mx-3 mt-3 pb-2">Files</h6>',
+              suggestion: function ({ src, name, subtitle, meta }) {
+                return (
+                  '<a href="javascript:;">' +
+                  '<div class="d-flex w-50">' +
+                  '<img class="me-3" src="' +
+                  assetsPath +
+                  src +
+                  '" alt="' +
+                  name +
+                  '" height="32">' +
+                  '<div class="w-75">' +
+                  '<h6 class="mb-0">' +
+                  name +
+                  '</h6>' +
+                  '<small class="text-muted">' +
+                  subtitle +
+                  '</small>' +
+                  '</div>' +
+                  '</div>' +
+                  '<small class="text-muted">' +
+                  meta +
+                  '</small>' +
+                  '</a>'
+                );
+              }
+            }
+          });
+        }
+        if (searchMembers.length) {
+          datasets.push({
+            name: 'members',
+            display: 'name',
+            limit: 4,
+            source: filterConfig(searchMembers),
+            templates: {
+              header: '<h6 class="suggestions-header text-primary mb-0 mx-3 mt-3 pb-2">Members</h6>',
+              suggestion: function ({ name, src, subtitle }) {
+                return (
+                  '<a href="javascript:;">' +
+                  '<div class="d-flex align-items-center">' +
+                  '<img class="rounded-circle me-3" src="' +
+                  assetsPath +
+                  src +
+                  '" alt="' +
+                  name +
+                  '" height="32">' +
+                  '<div class="user-info">' +
+                  '<h6 class="mb-0">' +
+                  name +
+                  '</h6>' +
+                  '<small class="text-muted">' +
+                  subtitle +
+                  '</small>' +
+                  '</div>' +
+                  '</div>' +
+                  '</a>'
+                );
+              }
+            }
+          });
+        }
         searchInput
           .typeahead(
             {
@@ -522,115 +632,7 @@ if (typeof $ !== 'undefined') {
                 suggestion: 'suggestion d-flex justify-content-between px-3 py-2 w-100'
               }
             },
-            // ? Add/Update blocks as per need
-            // Pages
-            {
-              name: 'pages',
-              display: 'name',
-              limit: 5,
-              source: filterConfig(searchData.pages),
-              templates: {
-                header: '<h6 class="suggestions-header text-primary mb-0 mx-3 mt-3 pb-2">Pages</h6>',
-                suggestion: function ({ url, icon, name }) {
-                  return (
-                    '<a href="' +
-                    url +
-                    '">' +
-                    '<div>' +
-                    '<i class="bx ' +
-                    icon +
-                    ' me-2"></i>' +
-                    '<span class="align-middle">' +
-                    name +
-                    '</span>' +
-                    '</div>' +
-                    '</a>'
-                  );
-                },
-                notFound:
-                  '<div class="not-found px-3 py-2">' +
-                  '<h6 class="suggestions-header text-primary mb-2">Pages</h6>' +
-                  '<p class="py-2 mb-0"><i class="bx bx-error-circle bx-xs me-2"></i> No Results Found</p>' +
-                  '</div>'
-              }
-            },
-            // Files
-            {
-              name: 'files',
-              display: 'name',
-              limit: 4,
-              source: filterConfig(searchData.files),
-              templates: {
-                header: '<h6 class="suggestions-header text-primary mb-0 mx-3 mt-3 pb-2">Files</h6>',
-                suggestion: function ({ src, name, subtitle, meta }) {
-                  return (
-                    '<a href="javascript:;">' +
-                    '<div class="d-flex w-50">' +
-                    '<img class="me-3" src="' +
-                    assetsPath +
-                    src +
-                    '" alt="' +
-                    name +
-                    '" height="32">' +
-                    '<div class="w-75">' +
-                    '<h6 class="mb-0">' +
-                    name +
-                    '</h6>' +
-                    '<small class="text-muted">' +
-                    subtitle +
-                    '</small>' +
-                    '</div>' +
-                    '</div>' +
-                    '<small class="text-muted">' +
-                    meta +
-                    '</small>' +
-                    '</a>'
-                  );
-                },
-                notFound:
-                  '<div class="not-found px-3 py-2">' +
-                  '<h6 class="suggestions-header text-primary mb-2">Files</h6>' +
-                  '<p class="py-2 mb-0"><i class="bx bx-error-circle bx-xs me-2"></i> No Results Found</p>' +
-                  '</div>'
-              }
-            },
-            // Members
-            {
-              name: 'members',
-              display: 'name',
-              limit: 4,
-              source: filterConfig(searchData.members),
-              templates: {
-                header: '<h6 class="suggestions-header text-primary mb-0 mx-3 mt-3 pb-2">Members</h6>',
-                suggestion: function ({ name, src, subtitle }) {
-                  return (
-                    '<a href="app-user-view-account.html">' +
-                    '<div class="d-flex align-items-center">' +
-                    '<img class="rounded-circle me-3" src="' +
-                    assetsPath +
-                    src +
-                    '" alt="' +
-                    name +
-                    '" height="32">' +
-                    '<div class="user-info">' +
-                    '<h6 class="mb-0">' +
-                    name +
-                    '</h6>' +
-                    '<small class="text-muted">' +
-                    subtitle +
-                    '</small>' +
-                    '</div>' +
-                    '</div>' +
-                    '</a>'
-                  );
-                },
-                notFound:
-                  '<div class="not-found px-3 py-2">' +
-                  '<h6 class="suggestions-header text-primary mb-2">Members</h6>' +
-                  '<p class="py-2 mb-0"><i class="bx bx-error-circle bx-xs me-2"></i> No Results Found</p>' +
-                  '</div>'
-              }
-            }
+            ...datasets
           )
           //On typeahead result render.
           .bind('typeahead:render', function () {

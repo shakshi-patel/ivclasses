@@ -110,13 +110,24 @@ class ResultAnnouncementController extends AdminController
     {
         $this->ensureCanAny(['result_announcement.add', 'result_announcement.edit']);
 
+        $totalMarks = Exam::query()->find((int) $request->input('exam_id'))?->total_marks;
+
         $validated = $request->validate([
             'exam_id' => ['required', 'integer', 'exists:exams,id'],
             'result_date' => ['nullable', 'date'],
             'publish' => ['sometimes', 'boolean'],
             'results' => ['required', 'array', 'min:1'],
             'results.*.student_id' => ['required', 'integer', 'exists:students,id'],
-            'results.*.marks_obtained' => ['nullable', 'numeric', 'min:0'],
+            'results.*.marks_obtained' => [
+                'nullable',
+                'numeric',
+                'min:0',
+                function (string $attribute, mixed $value, \Closure $fail) use ($totalMarks) {
+                    if ($value !== null && $totalMarks !== null && (float) $value > (float) $totalMarks) {
+                        $fail("Obtained marks cannot exceed the maximum marks ({$totalMarks}).");
+                    }
+                },
+            ],
             'results.*.remark' => ['nullable', 'string', 'max:255'],
             'results.*.is_attempted' => ['sometimes', 'boolean'],
             'results.*.attendance_status' => ['nullable', Rule::in(['present', 'absent'])],

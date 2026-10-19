@@ -253,7 +253,7 @@ class EmailTemplateController extends AdminController
 <div style="font-family: Arial, sans-serif; color: #1f2926; line-height: 1.6; padding: 24px;">
   <h2 style="margin-bottom: 8px; color: #0f5c4d;">Heading</h2>
   <p>Write your email body here. Use placeholders like {{name}}.</p>
-  <p>IV Classes</p>
+  <p>Class Flow</p>
 </div>
 HTML;
     }

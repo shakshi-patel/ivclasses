@@ -73,15 +73,16 @@
                                         </div>
                                         <div class="col-md-4">
                                             <label class="form-label">Monthly price (₹) <span class="req">*</span></label>
-                                            <input type="number" step="0.01" min="0" name="price_monthly"
+                                            <input type="number" step="0.01" min="0" name="price_monthly" id="price_monthly"
                                                 class="form-control"
                                                 value="{{ old('price_monthly', $plan?->price_monthly ?? 0) }}" required>
                                         </div>
                                         <div class="col-md-4">
                                             <label class="form-label">Yearly price (₹) <span class="req">*</span></label>
-                                            <input type="number" step="0.01" min="0" name="price_yearly"
+                                            <input type="number" step="0.01" min="0" name="price_yearly" id="price_yearly"
                                                 class="form-control"
                                                 value="{{ old('price_yearly', $plan?->price_yearly ?? 0) }}" required>
+                                            <div class="form-text">Must be ≥ monthly price (full-year amount)</div>
                                         </div>
                                         <div class="col-md-4">
                                             <label class="form-label">Currency</label>
@@ -102,7 +103,7 @@
                                     <div class="row g-3">
                                         <div class="col-md-4">
                                             <label class="form-label">Trial days</label>
-                                            <input type="number" min="0" name="trial_days" class="form-control"
+                                            <input type="number" min="0" max="365" name="trial_days" class="form-control"
                                                 value="{{ old('trial_days', $plan?->trial_days ?? 14) }}">
                                         </div>
                                         <div class="col-md-4">
@@ -467,6 +468,24 @@
 
             document.getElementById('planForm')?.addEventListener('submit', async function(e) {
                 e.preventDefault();
+                var monthlyEl = document.getElementById('price_monthly');
+                var yearlyEl = document.getElementById('price_yearly');
+                var monthly = parseFloat(monthlyEl?.value || '0');
+                var yearly = parseFloat(yearlyEl?.value || '0');
+                if (yearlyEl && !Number.isNaN(monthly) && !Number.isNaN(yearly) && yearly < monthly) {
+                    if (typeof AdminAjax !== 'undefined' && AdminAjax.showFieldErrors) {
+                        AdminAjax.showFieldErrors(
+                            { price_yearly: ['Yearly price must be greater than or equal to monthly price.'] },
+                            { price_yearly: '#price_yearly' },
+                            { root: this }
+                        );
+                    } else {
+                        yearlyEl.setCustomValidity('Yearly price must be greater than or equal to monthly price.');
+                        yearlyEl.reportValidity();
+                        yearlyEl.setCustomValidity('');
+                    }
+                    return;
+                }
                 var btn = document.getElementById('planSubmitBtn');
                 if (btn) btn.disabled = true;
                 try {

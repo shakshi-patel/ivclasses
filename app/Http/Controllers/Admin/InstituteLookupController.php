@@ -158,7 +158,7 @@ class InstituteLookupController extends AdminController
         $query = Batch::query()
             ->where('institute_id', $instituteId)
             ->where('status', 'active')
-            ->with(['subjects:id,name']);
+            ->with(['subjects:id,name', 'branch:id,name']);
 
         if (! empty($branchIds)) {
             $query->whereIn('branch_id', $branchIds);
@@ -169,15 +169,23 @@ class InstituteLookupController extends AdminController
             $query->whereIn('branch_id', $scope->branchIds());
         }
 
-        $items = $query->orderBy('name')->get()
+        $batches = $query->orderBy('name')->get()
             ->unique('id')
-            ->values()
-            ->map(fn (Batch $batch) => [
-                'id' => $batch->id,
-                'text' => $batch->name,
-                'branch_id' => $batch->branch_id,
-                'subjects' => $batch->subjects->map(fn ($s) => ['id' => $s->id, 'text' => $s->name])->values(),
-            ]);
+            ->values();
+
+        // Different branches can legitimately have same-named batches (e.g. every branch
+        // has its own "10th Morning"). Qualify with the branch name whenever the list spans
+        // more than one, so they don't look like literal duplicates in the dropdown.
+        $spansMultipleBranches = $batches->pluck('branch_id')->unique()->count() > 1;
+
+        $items = $batches->map(fn (Batch $batch) => [
+            'id' => $batch->id,
+            'text' => ($spansMultipleBranches && $batch->branch)
+                ? "{$batch->name} — {$batch->branch->name}"
+                : $batch->name,
+            'branch_id' => $batch->branch_id,
+            'subjects' => $batch->subjects->map(fn ($s) => ['id' => $s->id, 'text' => $s->name])->values(),
+        ]);
 
         return Ajax::success('OK', $items);
     }

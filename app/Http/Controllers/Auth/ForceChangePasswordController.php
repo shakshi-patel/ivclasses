@@ -36,6 +36,6 @@ class ForceChangePasswordController extends Controller
 
         return redirect()
             ->route('dashboard')
-            ->with('success', 'Password updated. Welcome to IV Classes.');
+            ->with('success', 'Password updated. Welcome to Class Flow.');
     }
 }

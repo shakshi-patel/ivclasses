@@ -69,7 +69,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Contact No.</label>
-                                        <input type="text" class="form-control" name="phone" maxlength="15" inputmode="numeric" data-phone-input
+                                        <input type="text" class="form-control" name="phone" maxlength="15" minlength="10" pattern="[0-9]{10,15}" inputmode="numeric" data-phone-input
                                             value="{{ old('phone', $staffMember?->user?->phone) }}"
                                             placeholder="Enter contact number">
                                     </div>

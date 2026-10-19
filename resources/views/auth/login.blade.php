@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $pageTitle ?? 'Sign in' }} · {{ config('app.name', 'IV Classes') }}</title>
+    <title>{{ $pageTitle ?? 'Sign in' }} · {{ config('brand.name') }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -696,7 +696,7 @@
                         @if (! empty($tenant?->logo_path))
                             <img src="{{ asset('storage/'.$tenant->logo_path) }}" alt="{{ $tenant->name }}">
                         @else
-                            <img src="{{ asset('website-assets/images/logo.png') }}" alt="IV Classes">
+                            <img src="{{ asset('website-assets/images/logo.png') }}" alt="{{ config('brand.name') }}">
                         @endif
                     </a>
                     <h2>{{ $heading ?? 'Welcome back' }}</h2>

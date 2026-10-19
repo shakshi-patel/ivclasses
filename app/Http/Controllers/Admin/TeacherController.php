@@ -200,7 +200,7 @@ class TeacherController extends AdminController
                 'max:150',
                 Rule::unique('users', 'email')->ignore($teacher?->user_id),
             ],
-            'phone' => ['nullable', 'string', 'max:15'],
+            'phone' => ['nullable', 'string', 'regex:/^[0-9]{10,15}$/'],
             'specialization_ids' => ['nullable', 'array'],
             'specialization_ids.*' => [
                 'integer',

@@ -67,6 +67,7 @@
                                     <div class="col-md-4">
                                         <label class="form-label">Purchase Date <span class="req">*</span></label>
                                         <input type="date" class="form-control" name="purchase_date" required
+                                            max="{{ date('Y-m-d') }}"
                                             value="{{ old('purchase_date', optional($asset?->purchase_date)->format('Y-m-d') ?? date('Y-m-d')) }}">
                                     </div>
                                     <div class="col-md-4">

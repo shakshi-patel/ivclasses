@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 <html lang="en" class="light-style layout-navbar-fixed layout-menu-fixed layout-compact" dir="ltr"
-    data-theme="theme-default" data-assets-path="{{ asset('admin-assets/') }}"
+    data-theme="theme-default" data-assets-path="{{ asset('admin-assets') }}/"
     data-template="vertical-menu-template-no-customizer" data-style="light">
 
 <head>
@@ -9,7 +9,7 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-    <title>IV Classes - Dashboard</title>
+    <title>{{ $brandName ?? config('brand.name') }} - Dashboard</title>
 
     <meta name="description" content="" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
@@ -5065,7 +5065,7 @@
     <!-- Helpers -->
     <script src="{{ asset('admin-assets/vendor/js/helpers.js') }}"></script>
 
-    <script src="{{ asset('admin-assets/js/config.js') }}"></script>
+    <script src="{{ asset('admin-assets/js/config.js') }}?v={{ filemtime(public_path('admin-assets/js/config.js')) }}"></script>
     @stack('styles')
 
 
@@ -5100,9 +5100,9 @@
                         @else
                             <span class="app-brand-logo demo">
                                 <img class="app-brand-logo-full" src="{{ asset('admin-assets/img/logo.png') }}"
-                                    alt="IV Classes" width="148" />
+                                    alt="{{ config('brand.name') }}" width="148" />
                                 <img class="app-brand-logo-mini" src="{{ asset('admin-assets/img/logo2.png') }}"
-                                    alt="IV Classes" />
+                                    alt="{{ config('brand.name') }}" />
                             </span>
                         @endif
                     </a>
@@ -5331,7 +5331,10 @@
     <script src="{{ asset('admin-assets/vendor/libs/apex-charts/apexcharts.js') }}"></script>
 
     <!-- Main JS -->
-    <script src="{{ asset('admin-assets/js/main.js') }}"></script>
+    <script>
+        window.adminSearchData = @json(\App\Support\AdminSearchCatalog::payload());
+    </script>
+    <script src="{{ asset('admin-assets/js/main.js') }}?v={{ filemtime(public_path('admin-assets/js/main.js')) }}"></script>
     <script src="{{ asset('admin-assets/js/tables-datatables-basic.js') }}"></script>
     <!-- Dropzone -->
     <script src="{{ asset('admin-assets/vendor/libs/dropzone/dropzone.js') }}"></script>
@@ -5344,7 +5347,7 @@
     <script src="{{ asset('admin-assets/js/admin-searchable-select.js') }}"></script>
     <script src="{{ asset('admin-assets/js/phone-input-guard.js') }}"></script>
     <script src="{{ asset('admin-assets/js/admin-institute-cascade.js') }}"></script>
-    <script src="{{ asset('admin-assets/js/admin-ajax.js') }}"></script>
+    <script src="{{ asset('admin-assets/js/admin-ajax.js') }}?v={{ filemtime(public_path('admin-assets/js/admin-ajax.js')) }}"></script>
     <script src="{{ asset('admin-assets/vendor/libs/shepherd/shepherd.js') }}"></script>
     <script>
         window.IV_ONBOARDING = {

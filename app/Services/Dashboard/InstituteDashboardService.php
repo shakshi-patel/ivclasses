@@ -825,7 +825,7 @@ class InstituteDashboardService
             ->groupBy('payment_method')
             ->orderByDesc('total')
             ->get()
-            ->mapWithKeys(fn ($row) => [Str::headline($row->payment_method ?: 'cash') => round((float) $row->total, 2)]);
+            ->mapWithKeys(fn ($row) => [\App\Support\PaymentMethodLabel::format($row->payment_method) => round((float) $row->total, 2)]);
 
         return [
             'labels' => $methods->keys()->all(),

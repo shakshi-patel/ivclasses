@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Sign in · {{ config('app.name', 'IV Classes') }}</title>
+    <title>Sign in · {{ config('brand.name') }}</title>
     <link rel="stylesheet" href="{{ asset('css/iv-tokens.css') }}">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -78,7 +78,7 @@
     <div class="wrap">
         <div class="top">
             <a href="{{ route('home') }}">
-                <img src="{{ asset('website-assets/images/logo.png') }}" alt="IV Classes">
+                <img src="{{ asset('website-assets/images/logo.png') }}" alt="{{ config('brand.name') }}">
             </a>
             <h1>Choose your portal</h1>
             <p>Each role signs in through a separate secure entry point. Pick the workspace that matches your account.</p>
@@ -116,7 +116,7 @@
             <article class="card">
                 <span class="badge">Platform</span>
                 <h2>Platform admin</h2>
-                <p>IV Classes internal team — institutes, demos, billing and platform configuration.</p>
+                <p>{{ config('brand.name') }} internal team — institutes, demos, billing and platform configuration.</p>
                 <a href="{{ route('login.platform') }}" class="btn btn-outline">Platform sign in</a>
             </article>
         </div>

@@ -5,6 +5,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -32,4 +33,29 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+
+        $exceptions->render(function (MethodNotAllowedHttpException $e, Request $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This action cannot be opened that way.',
+                ], 405);
+            }
+
+            $path = trim($request->path(), '/');
+            $indexUrl = null;
+            if (str_starts_with($path, 'admin/')) {
+                $parts = explode('/', $path);
+                // admin/{module}/... → prefer admin/{module} list when that route exists
+                if (isset($parts[1]) && $parts[1] !== '') {
+                    $candidate = url('admin/'.$parts[1]);
+                    $indexUrl = $candidate;
+                }
+            }
+
+            return response()->view('errors.405', [
+                'adminUrl' => url('/dashboard'),
+                'indexUrl' => $indexUrl,
+            ], 405);
+        });
     })->create();
