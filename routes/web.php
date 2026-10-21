@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\BillingController;
 use App\Http\Controllers\Admin\BatchController;
 use App\Http\Controllers\Admin\BranchController;
 use App\Http\Controllers\Admin\ClassesBrandingController;
+use App\Http\Controllers\Admin\AccountProfileController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DemoAvailabilityController;
 use App\Http\Controllers\Admin\DemoCalendarController;
@@ -267,7 +268,9 @@ Route::middleware(['auth', EnsureInstituteActive::class, 'password.changed'])
             Route::post('/permissions/sync', [PermissionController::class, 'sync'])->name('permissions.sync');
         });
 
-        Route::view('/profile', 'admin.profile.index')->name('profile');
+        Route::get('/profile', [AccountProfileController::class, 'index'])->name('profile');
+        Route::put('/profile', [AccountProfileController::class, 'update'])->name('profile.update');
+        Route::put('/profile/password', [AccountProfileController::class, 'updatePassword'])->name('profile.password');
 
         Route::get('/classes', [ClassesBrandingController::class, 'edit'])->name('classes');
         Route::put('/classes', [ClassesBrandingController::class, 'update'])->name('classes.update');

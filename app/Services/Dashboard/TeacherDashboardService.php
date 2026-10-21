@@ -21,7 +21,7 @@ use App\Services\ExamService;
 use App\Services\HomeworkService;
 use App\Services\NoticeService;
 use App\Services\TodoService;
-use App\Support\BranchScope;
+use App\Support\OwnBatchScope;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -162,7 +162,7 @@ class TeacherDashboardService
                 ->select(DB::raw('COUNT(DISTINCT student_id)'))])
             ->orderBy('start_time')
             ->orderBy('name')
-            ->get(['id', 'name', 'branch_id', 'standard_id', 'start_time', 'end_time']);
+            ->get(['id', 'name', 'branch_id', 'standard_id', 'status', 'start_time', 'end_time']);
 
         $primary = DB::table('batch_teacher')
             ->where('teacher_user_id', $this->user->id)
@@ -463,7 +463,7 @@ class TeacherDashboardService
     }
 
     /**
-     * Batch ids the teacher takes, within their branches.
+     * Batch ids the teacher takes (class or subject), not BranchScope.
      *
      * @return list<int>
      */
@@ -473,17 +473,7 @@ class TeacherDashboardService
             return $this->batchIds;
         }
 
-        $query = Batch::query()
-            ->where('institute_id', $this->instituteId)
-            ->where('status', 'active')
-            ->where(fn (Builder $q) => $q
-                ->whereHas('teachers', fn (Builder $t) => $t->where('users.id', $this->user->id))
-                ->orWhereHas('subjects', fn (Builder $s) => $s->where('batch_subject.teacher_user_id', $this->user->id)));
-
-        return $this->batchIds = BranchScope::for($this->user)->applyToBatches($query)
-            ->pluck('id')
-            ->map(fn ($id) => (int) $id)
-            ->all();
+        return $this->batchIds = OwnBatchScope::batchIds($this->user, activeOnly: true);
     }
 
     private function studentIdsQuery(): Builder
@@ -516,16 +506,18 @@ class TeacherDashboardService
     private function holidayQuery(): Builder
     {
         $query = Holiday::query()->where('institute_id', $this->instituteId);
-        $scope = BranchScope::for($this->user);
+        $batchIds = $this->batchIds();
+        $branchIds = OwnBatchScope::branchIds($this->user);
 
-        if (! $scope->isRestricted()) {
-            return $query;
-        }
-
-        $branchIds = $scope->branchIds();
-
-        return $query->where(fn (Builder $q) => $q->whereDoesntHave('branches')
-            ->orWhereHas('branches', fn (Builder $b) => $b->whereIn('branches.id', $branchIds ?: [0])));
+        return $query->where(function (Builder $q) use ($batchIds, $branchIds) {
+            $q->where(fn (Builder $inner) => $inner->whereDoesntHave('branches')->whereDoesntHave('batches'));
+            if ($branchIds !== []) {
+                $q->orWhereHas('branches', fn (Builder $b) => $b->whereIn('branches.id', $branchIds));
+            }
+            if ($batchIds !== []) {
+                $q->orWhereHas('batches', fn (Builder $b) => $b->whereIn('batches.id', $batchIds));
+            }
+        });
     }
 
     private function isHoliday(CarbonImmutable $day): bool

@@ -8,6 +8,7 @@ use App\Models\Student;
 use App\Models\Teacher;
 use App\Models\User;
 use App\Support\BranchScope;
+use App\Support\OwnBatchScope;
 use App\Support\ParentBatchScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
@@ -38,16 +39,15 @@ class HomeworkService
                 : $query->whereIn('batch_id', $batchIds);
         }
 
+        if ($user && $user->isTeacher()) {
+            $ids = OwnBatchScope::batchIds($user);
+
+            return $ids === [] ? $query->whereRaw('0 = 1') : $query->whereIn('batch_id', $ids);
+        }
+
         if ($user && BranchScope::for($user)->isRestricted()) {
             $ids = BranchScope::for($user)->branchIds();
             $query->whereIn('branch_id', $ids);
-        }
-
-        if ($user && $user->isTeacher()) {
-            $query->where(function ($q) use ($user) {
-                $q->where('teacher_user_id', $user->id)
-                    ->orWhere('created_by', $user->id);
-            });
         }
 
         return $query;
@@ -149,6 +149,12 @@ class HomeworkService
 
         if ($user && $user->isParent()) {
             ParentBatchScope::assertCanAccessBatch($user, (int) $homework->batch_id);
+
+            return;
+        }
+
+        if ($user && $user->isTeacher()) {
+            OwnBatchScope::assertCanAccessBatch($user, (int) $homework->batch_id);
 
             return;
         }

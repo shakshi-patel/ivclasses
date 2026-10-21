@@ -10,9 +10,9 @@
 | Field | Value |
 |-------|--------|
 | **Phase** | Phase 9 polish |
-| **Status** | Phase 0–6 done · Phase 7 mostly done · Phase 8 not started · Phase 9 DomPDF/receipts/dashboard UX in progress |
-| **Last updated** | 2026-10-19 |
-| **Active module** | Institute first-login setup + theme PDFs + receipts + dashboard UX |
+| **Status** | Phase 0–7 done · Phase 8 mobile API permission-gated (teacher/staff writes; branch writes stay web) · FCM deferred · Phase 9 leftovers |
+| **Last updated** | 2026-10-21 |
+| **Active module** | Product leftovers (billing dunning, SEO) — FCM not until asked |
 | **Blocked by** | Local subdomain setup on Laragon (`*.ivclasses.test`) — optional |
 | **PRD file** | `67c33d59a4db_prd.md` (v1.5 + §16.8 SweetAlert standard) |
 | **Agent rule** | `.cursor/rules/update-tracker.mdc` — auto-update this file after every add/edit/delete |
@@ -118,9 +118,27 @@ Mirror of `prd.md` phases. Tick as work completes.
 - [ ] Renewals / dunning (cron — when gateways connected)
 
 ### Phase 8 — API + Mobile
-- [ ] Sanctum
-- [ ] Parent / Teacher `/api/v1`
-- [ ] FCM hooks
+- [x] Sanctum + `/api/v1` auth (login/logout/me/change-password/profile)
+- [x] Phase 1 slice: dashboard, assigned branches, batches list/show/create/update + students tab
+- [x] Phase 1 slice: teachers/staff directory + students list/show/add/edit/status
+- [x] Phase 1 slice: inquiries list/show/add/edit/delete + follow-ups list/add
+- [x] Phase 1 slice: student + teacher attendance roster/mark + month reports
+- [x] Phase 1 slice: exams view/show/download, homework CRUD-gated, notices, todos
+- [x] Phase 1 slice: fees payment list + student summary + receipt/PDF (no collect)
+- [x] Phase 1 leftover: batch tabs, GET /users?tab=, teacher/staff attendance+work tabs
+- [x] Phase 1 leftover: student + inquiry form-fee receipts JSON+PDF
+- [x] Phase 1 leftover: holidays CRUD + study materials list/show/download/CRUD
+- [x] Phase 1 leftover: result announcements list/show/save/preview/PDF + exam result-sheet
+- [x] Phase 1 leftover: leave requests, CSV exports, batch status, inquiry convert, user permission overrides
+- [x] Phase 1 Branch Manager catalog complete (§5.1–§5.6, §5.8–§5.11 minus fee-collection)
+- [x] Phase 2 Teacher (option B): own-batch scoping, dashboard enrich, default teacher template unchanged
+- [x] Phase 3 Parent: child switcher dashboard, own-child academics/leave/fees/attendance calendar, ParentBatchScope
+- [x] Phase 5 Accountant: fee collect/delete, follow-ups, GST generate/show, I&E + categories; inventory permission-gated
+- [x] Phase 4 Receptionist: reuses Phase 1 inquiry/follow-up/student add/batch view; convert/delete stay permission-gated
+- [x] Phase 6 Principal: same Phase 1 endpoints; `mobile_role=principal` before BM; Postman principal env
+- [x] Permission parity: inventory + asset categories + subjects + standards on mobile (`$user->can`, default templates unchanged)
+- [x] Teacher/Staff mobile create/update/delete/status (permission-gated); branch add/edit stays web (branch login)
+- [ ] Phase 7 FCM: deferred — remove-and-rebuild later (device tokens, inbox, hooks, OpenAPI)
 
 ### Phase 9 — Polish
 - [x] In-module CSV exports (students, teachers, staff, inquiries, todos, roles, batch students, attendance, results)
@@ -142,6 +160,40 @@ Mirror of `prd.md` phases. Tick as work completes.
 
 | Date | Phase | Type | Summary | Files / notes |
 |------|-------|------|---------|---------------|
+| 2026-10-21 | 10 | chore | Flutter UI/UX blueprint: theme tokens, 4-tab shell, permission hub, Clean Architecture folders | `APP_UI_UX_BLUEPRINT.md` |
+| 2026-10-20 | 10 | chore | Manual API runbook: step-wise Postman order + paste-ready create/update JSON per module | `docs/mobile-api-manual-runbook.md` |
+| 2026-10-20 | 10 | chore | App-developer handbook: page/module-wise mobile API guide (auth, permissions, screens, request bodies) | `docs/mobile-api-app-developer-guide.md` |
+| 2026-10-20 | 10 | fix | Postman prerequest: drop discontinued `Url#getRaw` (use `toString`) so Login is not blocked | `docs/postman/Class-Flow-Mobile-API.postman_collection.json` |
+| 2026-10-20 | 10 | fix | Postman 404 `//` URLs: skip empty path ids even after Postman drops the segment (`/teachers/batches`, `/batches/status`); login/me save `teacher_id`/`staff_id` | `docs/postman/Class-Flow-Mobile-API.postman_collection.json`, `UserMeResource` |
+| 2026-10-20 | 10 | feat | Teacher/Staff mobile add/edit/delete/status, permission-gated like web; branch writes stay web-only | `Api\V1\Teacher/StaffController`, PRD §5.3–§5.4 |
+| 2026-10-20 | 10 | feat | Mobile permission parity: inventory/asset-categories + subjects/standards APIs; default templates unchanged | `Api\V1\InventoryAsset/AssetCategory/Subject/StandardController`, PRD §5.13/§9 |
+| 2026-10-20 | 10 | chore | Removed Mobile Phase 7 (FCM/inbox/OpenAPI) until requested — no current use | dropped `device_tokens`/`mobile_notifications`; unhooked inquiry/todo/notice/leave |
+| 2026-10-20 | 10 | feat | Mobile Phase 7 complete: device token register, notification inbox, FCM send (optional credentials), fee-due cron, OpenAPI from routes | `DeviceToken/NotificationController`, `MobilePushService`, `mobile:openapi`, `docs/mobile-api-openapi.yaml` |
+| 2026-10-20 | 10 | feat | Mobile Phase 6 Principal complete: same BM endpoints; resolve principal before BM so dual-hat matches dashboard persona | `MobileApiRole`, Postman principal env, `MobilePrincipalPhase6Test` |
+| 2026-10-20 | 10 | feat | Mobile Phase 4 Receptionist complete: reuses Phase 1 inquiry/follow-up/student add/batch view; academic batch tabs no longer open on `batch.view` alone | `BatchController` tabs, demo receptionist seed, Postman receptionist env |
+| 2026-10-20 | 10 | feat | Mobile Phase 5 Accountant complete: fee collect/delete, follow-ups, GST, I&E+categories; BranchScope institute-wide unless assigned; inventory skipped | `Api\V1\Fee/GstInvoice/IncomeExpenseController`, `BranchScope`, Postman accountant env |
+| 2026-10-20 | 10 | feat | Mobile Phase 3 Parent complete: child-switcher dashboard, own-child students/exams/homework/results/notices/holidays/fees/attendance/leave | `ParentBatchScope`, Api\V1 Dashboard/Student/Exam/Fee/Holiday/Attendance/Leave/Result, Postman parent env |
+| 2026-10-20 | 10 | feat | Mobile Phase 2 Teacher complete (option B): OwnBatchScope on academics/attendance/dashboard; default teacher template unchanged | `OwnBatchScope`, Exam/Homework/StudyMaterial/Notice/ResultAnnouncement services, Api\V1 Batch/Student/Attendance/Dashboard, PRD §9, Postman teacher env |
+| 2026-10-20 | 10 | feat | Mobile Phase 1 complete: leave, CSV exports, batch status, inquiry convert, user permission overrides | `Api\V1\LeaveRequest/Export/Batch/Inquiry/UserController`, `docs/postman/*` |
+| 2026-10-20 | 10 | feat | Mobile Phase 1 leftover: result announcements list/show/save/preview/PDF + exam result-sheet | `Api\V1\ResultAnnouncement/ExamController`, `docs/postman/*` |
+| 2026-10-20 | 10 | feat | Mobile Phase 1 leftover: student/inquiry form-fee receipts JSON+PDF, holidays CRUD, study materials | `Api\V1\Student/Inquiry/Holiday/StudyMaterialController`, `docs/postman/*` |
+| 2026-10-20 | 10 | feat | Mobile Phase 1 leftover: batch view tabs, GET /users?tab=, teacher/staff attendance+work | `Api\V1\Batch/User/Teacher/StaffController`, `docs/postman/*` |
+| 2026-10-20 | 10 | feat | Mobile Phase 1: fees view list/student-summary/receipt JSON+PDF; collect not built | `Api\V1\FeeController`, `docs/postman/*` |
+| 2026-10-20 | 10 | feat | Mobile Phase 1: exams, homework, notices, todos APIs; same Postman collection updated | `Api\V1\Exam/Homework/Notice/TodoController`, `docs/postman/*` |
+| 2026-10-20 | 10 | feat | Mobile Phase 1: student + teacher attendance roster/mark + month reports; CSV exports skipped | `Api\V1\Student/StaffAttendanceController`, `docs/postman/*` |
+| 2026-10-20 | 10 | feat | Mobile Phase 1: inquiries CRUD + follow-ups list/add; same Postman collection updated | `Api\V1\Inquiry/FollowUpController`, `docs/postman/*` |
+| 2026-10-20 | 10 | chore | Postman write tests use created_* ids so create/update does not overwrite live batches/students | `docs/postman/*` |
+| 2026-10-20 | 10 | feat | Mobile Phase 1: teachers/staff directory + students CRUD/status; same Postman collection updated | `Api\V1\Teacher/Staff/StudentController`, `docs/postman/*` |
+| 2026-10-20 | 10 | chore | Postman collection + local env so all mobile APIs can be run in one click after Login | `docs/postman/*` |
+| 2026-10-20 | 10 | feat | Mobile Phase 1 start: GET dashboard + widget, GET /branch, batches list/show/create/update + students tab | `Api\V1\Dashboard/Branch/BatchController`, `routes/api.php` |
+| 2026-10-20 | 10 | fix | API logout now revokes the bearer token; old token on profile/me returns 401 Unauthenticated (token-only, no web-session leak) | `AuthController@logout`, `EnsureMobileBearerToken`, `config/sanctum.php` |
+| 2026-10-20 | 10 | fix | Web profile/dashboard now re-load auth user from DB each request + no-store headers (stale tab showed old Kanku name after API save) | `EnsureInstituteActive`, `admin/profile/index` |
+| 2026-10-20 | 10 | fix | Web branch Profile was a dummy form — now saves name/phone/avatar/password via same account service; dashboard greeting reads fresh `users.name` | `AccountProfileController`, `admin/profile/index`, institute dashboard, layout |
+| 2026-10-20 | 10 | fix | Mobile profile now syncs managed branch contact (contact_person/phone/email) + parent contact; campus `branches.name` untouched | `MobileUserAccountService`, ProfileController, MobileAuthAccountTest |
+| 2026-10-19 | 10 | fix | Mobile profile/password write via DB query + verify persist; response includes `database` (`iv_class`); profile accepts POST | `MobileUserAccountService`, Auth/Profile API controllers |
+| 2026-10-19 | 10 | fix | Mobile change-password: reload user, verify hash persisted, revoke all tokens (no double-hash) | `Api\V1\AuthController@changePassword` |
+| 2026-10-19 | 10 | feat | Mobile API Phase 0: Sanctum + `/api/v1` auth (login/logout/me/change-password/profile) | `AuthController`, `UserMeResource`, `MobileApiRole`, `routes/api.php`, sanctum migration |
+| 2026-10-19 | 9 | chore | Removed rebuild migration + MariaDB patch file (kept CASE expression in original batches unique migration) | deleted `130000_rebuild_*`, `database/patches/*` |
 | 2026-10-19 | 9 | fix | batches `deleted_at_key` uses CASE not IFNULL (MariaDB import #1901) | migration `add_unique_branch_name_constraint_to_batches` |
 | 2026-10-19 | 9 | fix | B23: Hide billing bypass/dev .env hints from UI (bypass driver still works) | `billing/index`, `billing/platform` |
 | 2026-10-19 | 9 | fix | P4: Project Inquiry Demo Time fills after date pick (tear down Select2 on rebuild) | `project-inquiries/create.blade.php` |
@@ -257,6 +309,16 @@ Mirror of `prd.md` phases. Tick as work completes.
 
 | Date | Phase | Error | Cause | Fix | Status |
 |------|-------|-------|-------|-----|--------|
+| 2026-10-20 | 10 | Postman Login pre-request error `Url#getRaw has been discontinued` | Collection skip script called `getRaw()`; Postman still exposes it but throws | Use `url.toString()` + request-name skip; re-import collection | Resolved |
+| 2026-10-20 | 10 | Postman Runner 404 on `/teachers/batches`, `/teachers/login-history`, `/batches/status` | Empty `{{teacher_id}}` / `{{created_batch_id}}` — Postman drops the blank segment so the URL looks like a missing page | Collection prerequest skips those requests; login fills `teacher_id` from `user.teacher.id`. Re-import collection. Teachers list 403 is missing `teacher.view`, not a missing route | Resolved |
+| 2026-10-20 | 10 | Dual-hat principal+BM would login as `branch_manager` | `MobileApiRole` checked `isBranchManager()` before `isPrincipal()` | Principal first, matching `DashboardPersona` | Resolved |
+| 2026-10-20 | 10 | Receptionist/teacher with only `batch.view` could open exam/homework/attendance tabs | Batch tab `ensureCanAny` fell back to `batch.view` | Tabs now require the module perm (`exam.view`, `attendance.view`, …); students tab still allows `batch.view` | Resolved |
+| 2026-10-20 | 10 | Accountant/receptionist would see empty fee/GST/I&E lists | `BranchScope::isRestricted` true for all non-admin staff; no `branch_user` → `whereRaw 1=0` | Institute-wide unless assigned branches | Resolved |
+| 2026-10-20 | 10 | Teacher APIs hid all batches (empty list / 404) | `BranchScope::isRestricted` is true for teachers; no `branch_user` → `whereRaw 1=0`. Exam/homework also filtered `created_by` only | `OwnBatchScope` (`batch_teacher` OR `batch_subject`); skip BranchScope for teachers | Resolved |
+| 2026-10-20 | 10 | API logout then old token still updated profile | Sanctum used web session (`TransientToken::delete` is no-op) so PAT stayed valid | Token-only Sanctum + revoke PAT on logout; 401 Unauthenticated | Resolved |
+| 2026-10-20 | 10 | After API name change, web still showed Kanku_manager / old phone | `users` already had Kanku_managerr @ 09:51; screenshot was stale browser page (old profile copy) | Rebind auth user from DB + Cache-Control no-store on CRM pages | Resolved |
+| 2026-10-20 | 10 | Branch web dashboard/profile name did not change after profile edit | Admin `/profile` form was `action="#"` / `onsubmit=false` so Save wrote nothing; greeting reads `users.name` | Wired `AccountProfileController` to same persist+sync service | Resolved |
+| 2026-10-20 | 10 | Profile API success but branch list still showed old name/phone/email | Contact copied onto `branches.contact_person/phone/email` at create; profile only wrote `users` | Sync those columns for `manager_user_id` (and parent rows) after profile save | Resolved |
 | 2026-10-19 | 9 | Assign plan accepted trial days like 99999 | Input had `min=1` only; no client max | Form `max=365` + JS check; server already `max:365` | Resolved |
 | 2026-10-19 | 9 | Asset saved with future purchase date (e.g. 2030) | Purchase date had no max/today rule | Form `max=today` + server `before_or_equal:today` | Resolved |
 | 2026-10-19 | 9 | POST-only admin URL shows raw Method Not Allowed; Enterprise billing shows 2/3 not Unlimited | No 405 view; institute had `max_branches_override=3` over unlimited plan | Friendly `errors/405`; clear stale overrides on unlimited plan assign/activate; billing labels custom caps | Resolved |
@@ -282,7 +344,7 @@ Mirror of `prd.md` phases. Tick as work completes.
 ## Remaining (priority)
 
 1. **Phase 7:** Renewals / dunning cron when Razorpay/Stripe live  
-2. **Phase 8:** Sanctum + Parent/Teacher API + FCM  
+2. **Phase 8 leftover:** Mobile Phase 7 FCM/push + OpenAPI — deferred until asked. Inventory/subject/standard now on API (permission-gated).  
 3. **Phase 9:** SEO pages, Excel import, WhatsApp/SMS, trash/restore UI, onboarding wizard, automated tests  
 4. **Optional:** Document Laragon `*.ivclasses.test` smoke  
 5. **Module Help content:** paste-ready guides for modules still missing copy (Branch/Teacher/Staff covered)
@@ -291,7 +353,7 @@ Mirror of `prd.md` phases. Tick as work completes.
 
 ## Notes / memory (read every new session)
 
-- Admin CRM modules Phases **1–6 are wired to DB** (not UI mock). Remaining = Phase 8 API + Phase 9 polish leftovers + Phase 7 renewals.
+- Admin CRM modules Phases **1–6 are wired to DB** (not UI mock). Remaining = Phase 8 API leftover (FCM deferred) + Phase 9 polish leftovers + Phase 7 renewals. Mobile operational modules follow `$user->can` — not role-hardcoded.
 - **Exports live on module pages** — no separate Reports sidebar. CSV via `ExportController`; many PDFs now **Barryvdh DomPDF** download (theme teal/gold). Browser-print blades still exist for some receipts.
 - **Receipts (student / fee / inquiry):** shared `iv-receipt` chrome + institute logo/stamp/signature + `fees_receipt_terms` from branding; modal preview then Export PDF.
 - **Module Help:** Shepherd.js page tour (vendor lib). Step `target` CSS selector highlights a control; empty target is a centered tip. First-visit auto-open until last-step Done (Skip/X does not mark done). Dashboard waits for charts before auto-open.
@@ -301,9 +363,18 @@ Mirror of `prd.md` phases. Tick as work completes.
 - Tenant isolation = `institute_id` + subdomain + Spatie `setPermissionsTeamId`.
 - Soft delete + AJAX CRUD on all business modules when wired.
 - After **any** code change: update this tracker in the **same session** (enforced by `.cursor/rules/update-tracker.mdc` — agent must not wait to be asked).
-- **Seed logins:** `developer@ivclasses.com` / `password` (platform); `admin@demo-institute.test` / `password` (demo institute); `teacher@demo-institute.test` / `password` (teacher); `principal@demo-institute.test` / `password` (branch manager staff).
+- **Seed logins:** `developer@ivclasses.com` / `password` (platform); `admin@demo-institute.test` / `password` (demo institute); `teacher@demo-institute.test` / `password` (teacher); `principal@demo-institute.test` / `password` (principal); `accountant@demo-institute.test` / `password` (accountant, no branch_user); `receptionist@demo-institute.test` / `password` (receptionist, no branch_user). Demo trial extras include `fees_follow_up`, `income_expense`, `inquiry`, `follow_up`.
 - PHP CLI: use `D:\laragon\bin\php\php-8.3.1-nts-Win32-vs16-x64\php.exe` (system PATH often has no `php`).
 - DomPDF images: prefer `public_path('storage/...')` file paths in PDF blades.
+- **Mobile Phase 2 option B:** do not grow default `teacher` template. Teacher data wall is `OwnBatchScope` (class + subject teacher), never `BranchScope`. Extra perms are per-institute.
+- **Mobile Phase 3 Parent:** child wall is `ParentBatchScope`. Default parent template unchanged. Pass `student_id` to switch children. Attendance calendar / fees due use `parent_dashboard.*` when the module perm is missing.
+- **Mobile Phase 5 Accountant:** `BranchScope` is institute-wide for accountant/receptionist unless they have `branch_user` rows. Default accountant has fees add (not delete), GST add, I&E add (not delete). Inventory APIs exist; default accountant has no `inventory.*` (403 until granted). Plan still gates inventory.
+- **Mobile Phase 4 Receptionist:** reuses Phase 1 inquiry/follow-up/student add/batch view. Default template has no `inquiry.convert` / `student.edit`. Batch academic tabs need the module perm, not just `batch.view`.
+- **Mobile Phase 6 Principal:** same APIs as BM. `MobileApiRole` resolves `principal` before branch manager. Dashboard persona `principal`.
+- **Mobile Phase 7:** not in the codebase. Rebuild only when asked: device tokens, notification inbox, inquiry/todo/notice/leave/fee-due hooks, FCM HTTP v1, OpenAPI from routes.
+- **Mobile permission parity (2026-10-20):** web modules on mobile if `$user->can`. Inventory + asset categories + subjects + standards shipped. Teacher/Staff create-update-delete-status on mobile. **Branch add/edit/delete stays web** (created from institute/branch login, not the app). Default templates unchanged. Platform/Institute Admin still no mobile login. Roles/settings/billing stay web.
+- Mobile Postman: BM env `Class-Flow-Mobile-API.postman_environment.json`; teacher env `Class-Flow-Mobile-API.teacher.postman_environment.json`; parent env `Class-Flow-Mobile-API.parent.postman_environment.json`; accountant env `Class-Flow-Mobile-API.accountant.postman_environment.json`; receptionist env `Class-Flow-Mobile-API.receptionist.postman_environment.json`; principal env `Class-Flow-Mobile-API.principal.postman_environment.json`. One collection. Disable Change password + Logout in Runner. Re-import collection after file changes. Runner skips requests whose path id is empty (that was the `/teachers//batches` 404). Batch toggle needs **Batch create** first. Teacher directory 403 = no `teacher.view`.
+- Hand this to the mobile app team: `docs/mobile-api-app-developer-guide.md` (product + screens + working APIs). Click-each-API runbook: `docs/mobile-api-manual-runbook.md`. Flutter look-and-flow: `APP_UI_UX_BLUEPRINT.md`. PRD stays `docs/mobile-api-prd.md`.
 
 ---
 

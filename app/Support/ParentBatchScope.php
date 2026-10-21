@@ -53,19 +53,38 @@ class ParentBatchScope
         );
     }
 
+    public static function ownsStudent(User $user, int $studentId): bool
+    {
+        if (! $user->isParent()) {
+            return false;
+        }
+
+        return Student::query()
+            ->where('id', $studentId)
+            ->whereHas('parent', fn ($q) => $q->where('user_id', $user->id))
+            ->exists();
+    }
+
+    public static function assertOwnsStudent(User $user, int $studentId): void
+    {
+        abort_unless(
+            self::ownsStudent($user, $studentId),
+            404,
+            'Student not found.'
+        );
+    }
+
     /**
      * @return Collection<int, int>
      */
-    protected static function studentIds(User $user, ?int $studentId = null): Collection
+    public static function studentIds(User $user, ?int $studentId = null): Collection
     {
         if ($studentId) {
-            $owns = Student::query()
-                ->where('id', $studentId)
-                ->where('status', 'active')
-                ->whereHas('parent', fn ($q) => $q->where('user_id', $user->id))
-                ->exists();
-
-            abort_unless($owns, 403, 'You can only view content for your own children.');
+            abort_unless(
+                self::ownsStudent($user, $studentId),
+                403,
+                'You can only view content for your own children.'
+            );
 
             return collect([(int) $studentId]);
         }

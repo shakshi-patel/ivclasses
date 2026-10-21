@@ -8,6 +8,7 @@ use App\Models\ResultAnnouncement;
 use App\Models\Student;
 use App\Models\User;
 use App\Support\BranchScope;
+use App\Support\OwnBatchScope;
 use App\Support\ParentBatchScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -40,6 +41,14 @@ class ResultAnnouncementService
             return $query->whereHas('exam', fn ($q) => $q->whereIn('batch_id', $batchIds));
         }
 
+        if ($user && $user->isTeacher()) {
+            $ids = OwnBatchScope::batchIds($user);
+
+            return $ids === []
+                ? $query->whereRaw('0 = 1')
+                : $query->whereHas('exam', fn ($q) => $q->whereIn('batch_id', $ids));
+        }
+
         if ($user && BranchScope::for($user)->isRestricted()) {
             $ids = BranchScope::for($user)->branchIds();
             $query->whereHas('exam', fn ($q) => $q->whereIn('branch_id', $ids));
@@ -58,6 +67,14 @@ class ResultAnnouncementService
 
         if ($user && ! $user->isPlatformUser()) {
             $query->where('institute_id', $user->institute_id);
+        }
+
+        if ($user && $user->isTeacher()) {
+            $ids = OwnBatchScope::batchIds($user);
+
+            return $ids === []
+                ? $query->whereRaw('0 = 1')
+                : $query->whereHas('exam', fn ($q) => $q->whereIn('batch_id', $ids));
         }
 
         if ($user && BranchScope::for($user)->isRestricted()) {
@@ -141,7 +158,15 @@ class ResultAnnouncementService
             abort_unless($announcement->published_at !== null, 403, 'This result is not published yet.');
 
             return;
-        } elseif ($announcement->exam?->branch_id) {
+        }
+
+        if ($user && $user->isTeacher() && $announcement->exam) {
+            OwnBatchScope::assertCanAccessBatch($user, (int) $announcement->exam->batch_id);
+
+            return;
+        }
+
+        if ($announcement->exam?->branch_id) {
             BranchScope::for($user)->assertCanAccessBranch((int) $announcement->exam->branch_id);
         }
     }

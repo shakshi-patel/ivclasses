@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Services\PermissionSyncService;
 use App\Services\StaffService;
 use App\Services\TeacherService;
+use App\Support\PlanModules;
 use App\Support\Tenancy;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -183,6 +184,13 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        $institute->update([
+            'modules_extra_json' => array_values(array_unique(array_merge(
+                PlanModules::expand($institute->modules_extra_json),
+                ['fees_follow_up', 'income_expense', 'inquiry', 'follow_up']
+            ))),
+        ]);
+
         Subscription::query()->updateOrCreate(
             [
                 'institute_id' => $institute->id,
@@ -272,7 +280,7 @@ class DatabaseSeeder extends Seeder
             ->first();
 
         if ($principalRole && ! User::query()->where('email', 'principal@demo-institute.test')->exists()) {
-            $staffService->create([
+            $principal = $staffService->create([
                 'institute_id' => $institute->id,
                 'name' => 'Ravi Patel',
                 'email' => 'principal@demo-institute.test',
@@ -289,8 +297,60 @@ class DatabaseSeeder extends Seeder
                 'status' => 'active',
                 'primary_branch_id' => $branch->id,
                 'role_id' => $principalRole->id,
-                'set_as_branch_manager' => true,
             ]);
+            $principal->user->forceFill(['must_change_password' => false])->save();
+        }
+
+        $accountantRole = Role::query()
+            ->where('name', 'accountant')
+            ->where('team_id', $institute->id)
+            ->first();
+
+        if ($accountantRole && ! User::query()->where('email', 'accountant@demo-institute.test')->exists()) {
+            $accountant = $staffService->create([
+                'institute_id' => $institute->id,
+                'name' => 'Demo Accountant',
+                'email' => 'accountant@demo-institute.test',
+                'phone' => '9876510005',
+                'password' => 'password',
+                'password_confirmation' => 'password',
+                'designation' => 'Accountant',
+                'address' => 'Station Road, Mehsana',
+                'city' => 'Mehsana',
+                'state' => 'Gujarat',
+                'pincode' => '384001',
+                'expected_login_time' => '09:30',
+                'grace_minutes' => 10,
+                'status' => 'active',
+                'role_id' => $accountantRole->id,
+            ]);
+            $accountant->user->forceFill(['must_change_password' => false])->save();
+        }
+
+        $receptionistRole = Role::query()
+            ->where('name', 'receptionist')
+            ->where('team_id', $institute->id)
+            ->first();
+
+        if ($receptionistRole && ! User::query()->where('email', 'receptionist@demo-institute.test')->exists()) {
+            $receptionist = $staffService->create([
+                'institute_id' => $institute->id,
+                'name' => 'Demo Receptionist',
+                'email' => 'receptionist@demo-institute.test',
+                'phone' => '9876510006',
+                'password' => 'password',
+                'password_confirmation' => 'password',
+                'designation' => 'Receptionist',
+                'address' => 'Station Road, Mehsana',
+                'city' => 'Mehsana',
+                'state' => 'Gujarat',
+                'pincode' => '384001',
+                'expected_login_time' => '09:00',
+                'grace_minutes' => 10,
+                'status' => 'active',
+                'role_id' => $receptionistRole->id,
+            ]);
+            $receptionist->user->forceFill(['must_change_password' => false])->save();
         }
 
         $standards = [

@@ -1,10 +1,13 @@
 <?php
 
 use App\Http\Middleware\ResolveTenant;
+use App\Support\Ajax;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -24,6 +27,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'institute_active' => \App\Http\Middleware\EnsureInstituteActive::class,
             'permissions_team' => \App\Http\Middleware\SyncPermissionsTeamFromAuth::class,
             'password.changed' => \App\Http\Middleware\EnsurePasswordChanged::class,
+            'mobile.api' => \App\Http\Middleware\EnsureMobileApiAccess::class,
+            'mobile.bearer' => \App\Http\Middleware\EnsureMobileBearerToken::class,
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
@@ -33,6 +38,20 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return Ajax::error('Unauthenticated.', null, 401);
+            }
+        });
+
+        $exceptions->render(function (HttpException $e, Request $request) {
+            if ($request->is('api/*') && in_array($e->getStatusCode(), [403, 404], true)) {
+                $message = $e->getMessage() ?: ($e->getStatusCode() === 404 ? 'Not found.' : 'Unauthorized.');
+
+                return Ajax::error($message, null, $e->getStatusCode());
+            }
+        });
 
         $exceptions->render(function (MethodNotAllowedHttpException $e, Request $request) {
             if ($request->expectsJson() || $request->is('api/*')) {

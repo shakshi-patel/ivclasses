@@ -5147,7 +5147,7 @@
                             <!-- User -->
                             @auth
                                 @php
-                                    $navUser = auth()->user();
+                                    $navUser = auth()->user()?->fresh() ?? auth()->user();
                                     $navAvatar = $navUser->avatarUrl();
                                     $navName = $navUser->name;
                                     $navLabel = $navUser->typeLabel();

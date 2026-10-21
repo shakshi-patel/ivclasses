@@ -8,7 +8,7 @@
     use App\Support\Money;
     use Illuminate\Support\Str;
 
-    $user = auth()->user();
+    $user = auth()->user()?->fresh() ?? auth()->user();
     $hour = (int) now()->format('G');
     $greeting = $hour < 12 ? 'Good morning' : ($hour < 17 ? 'Good afternoon' : 'Good evening');
     $money = Money::format(...);

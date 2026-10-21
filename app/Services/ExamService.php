@@ -9,6 +9,7 @@ use App\Models\StudentAttendance;
 use App\Models\StudentBatch;
 use App\Models\User;
 use App\Support\BranchScope;
+use App\Support\OwnBatchScope;
 use App\Support\ParentBatchScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
@@ -38,13 +39,15 @@ class ExamService
                 : $query->whereIn('batch_id', $batchIds);
         }
 
+        if ($user && $user->isTeacher()) {
+            $ids = OwnBatchScope::batchIds($user);
+
+            return $ids === [] ? $query->whereRaw('0 = 1') : $query->whereIn('batch_id', $ids);
+        }
+
         if ($user && BranchScope::for($user)->isRestricted()) {
             $ids = BranchScope::for($user)->branchIds();
             $query->whereIn('branch_id', $ids);
-        }
-
-        if ($user && $user->isTeacher()) {
-            $query->where('created_by', $user->id);
         }
 
         return $query;
@@ -108,6 +111,12 @@ class ExamService
 
         if ($user && $user->isParent()) {
             ParentBatchScope::assertCanAccessBatch($user, (int) $exam->batch_id);
+
+            return;
+        }
+
+        if ($user && $user->isTeacher()) {
+            OwnBatchScope::assertCanAccessBatch($user, (int) $exam->batch_id);
 
             return;
         }

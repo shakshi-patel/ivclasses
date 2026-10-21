@@ -447,7 +447,7 @@ class ParentDashboardService
      */
     public function holidays(int $limit = 4): Collection
     {
-        if (! $this->child || ! $this->shows('list_holidays') || ! $this->can('holidays')) {
+        if (! $this->child || ! $this->shows('list_holidays')) {
             return collect();
         }
 

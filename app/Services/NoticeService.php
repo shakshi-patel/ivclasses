@@ -7,6 +7,7 @@ use App\Models\Notice;
 use App\Models\Student;
 use App\Models\User;
 use App\Support\BranchScope;
+use App\Support\OwnBatchScope;
 use App\Support\ParentBatchScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
@@ -42,6 +43,10 @@ class NoticeService
             });
         }
 
+        if ($user && $user->isTeacher()) {
+            return $this->scopeTeacherNotices($query, $user);
+        }
+
         if ($user && BranchScope::for($user)->isRestricted()) {
             $ids = BranchScope::for($user)->branchIds();
             $query->where(function ($q) use ($ids) {
@@ -63,6 +68,10 @@ class NoticeService
 
         if ($user && ! $user->isPlatformUser()) {
             $query->where('institute_id', $user->institute_id);
+        }
+
+        if ($user && $user->isTeacher()) {
+            return $this->scopeTeacherNotices($query, $user);
         }
 
         if ($user && BranchScope::for($user)->isRestricted()) {
@@ -181,6 +190,12 @@ class NoticeService
                 403,
                 'You cannot access this notice.'
             );
+
+            return;
+        }
+
+        if ($user && $user->isTeacher()) {
+            $this->assertTeacherCanAccessNotice($user, $notice);
 
             return;
         }
@@ -313,6 +328,61 @@ class NoticeService
     {
         if (Storage::disk('public')->exists($path)) {
             Storage::disk('public')->delete($path);
+        }
+    }
+
+    /**
+     * @param  Builder<Notice>  $query
+     * @return Builder<Notice>
+     */
+    protected function scopeTeacherNotices(Builder $query, User $user): Builder
+    {
+        $batchIds = OwnBatchScope::batchIds($user);
+        $branchIds = OwnBatchScope::branchIds($user);
+
+        return $query->where(function ($q) use ($batchIds, $branchIds) {
+            $q->where(function ($inner) use ($batchIds) {
+                $inner->whereDoesntHave('batches');
+                if ($batchIds !== []) {
+                    $inner->orWhereHas('batches', fn ($bq) => $bq->whereIn('batches.id', $batchIds));
+                }
+            })->where(function ($inner) use ($branchIds) {
+                $inner->whereDoesntHave('branches');
+                if ($branchIds !== []) {
+                    $inner->orWhereHas('branches', fn ($bq) => $bq->whereIn('branches.id', $branchIds));
+                }
+            });
+        });
+    }
+
+    protected function assertTeacherCanAccessNotice(User $user, Notice $notice): void
+    {
+        $hasBatches = $notice->relationLoaded('batches') ? $notice->batches->isNotEmpty() : $notice->batches()->exists();
+        if ($hasBatches) {
+            $own = collect(OwnBatchScope::batchIds($user));
+            $noticeBatchIds = $notice->relationLoaded('batches')
+                ? $notice->batches->pluck('id')
+                : $notice->batches()->pluck('batches.id');
+
+            abort_unless(
+                $noticeBatchIds->intersect($own)->isNotEmpty(),
+                404,
+                'Notice not found.'
+            );
+        }
+
+        $hasBranches = $notice->relationLoaded('branches') ? $notice->branches->isNotEmpty() : $notice->branches()->exists();
+        if ($hasBranches) {
+            $own = collect(OwnBatchScope::branchIds($user));
+            $noticeBranchIds = $notice->relationLoaded('branches')
+                ? $notice->branches->pluck('id')
+                : $notice->branches()->pluck('branches.id');
+
+            abort_unless(
+                $noticeBranchIds->intersect($own)->isNotEmpty(),
+                404,
+                'Notice not found.'
+            );
         }
     }
 }

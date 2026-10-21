@@ -31,7 +31,17 @@ class BranchScope
             return false;
         }
 
-        return $this->user->user_type !== UserType::InstituteAdmin;
+        if ($this->user->user_type === UserType::InstituteAdmin) {
+            return false;
+        }
+
+        // Accountant / receptionist are institute-wide unless assigned to branches.
+        $role = MobileApiRole::resolve($this->user);
+        if (in_array($role, [MobileApiRole::ACCOUNTANT, MobileApiRole::RECEPTIONIST], true)) {
+            return $this->user->branches()->where('branches.status', 'active')->exists();
+        }
+
+        return true;
     }
 
     /**

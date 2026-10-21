@@ -1,0 +1,2763 @@
+{
+    "info": {
+        "name": "Class Flow Mobile API v1",
+        "description": "Import this collection + one Local environment. Run **Auth \u2192 Login** first (saves Bearer token + ids). Then Run folder.\n\nEmpty path ids are skipped (Runner otherwise sends `/teachers/batches` and `/batches/status` \u2192 404). Re-import this file after every collection change.\n\n**Branch Manager:** `Class-Flow-Mobile-API.postman_environment.json`.\n\n**Phase 2 Teacher (option B):** `Class-Flow-Mobile-API.teacher.postman_environment.json` (`teacher@demo-institute.test`). Default teacher only has dashboard + own batches \u2014 403 on exams/homework/attendance and Teachers directory is expected.\n\n**Phase 3 Parent:** `Class-Flow-Mobile-API.parent.postman_environment.json`. Login fills `student_id` from `user.children[0]`.\n\n**Phase 4 Receptionist:** `Class-Flow-Mobile-API.receptionist.postman_environment.json`.\n\n**Phase 5 Accountant:** `Class-Flow-Mobile-API.accountant.postman_environment.json`.\n\n**Phase 6 Principal:** `Class-Flow-Mobile-API.principal.postman_environment.json` (`principal@demo-institute.test`).\n\nDisable Change password + Logout in Runner. Batch toggle/update only run after **Batch create** succeeds.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{token}}",
+                "type": "string"
+            }
+        ]
+    },
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "function envVal(name) {",
+                    "  return String(pm.environment.get(name) || pm.collectionVariables.get(name) || pm.variables.get(name) || '').trim();",
+                    "}",
+                    "function skip(reason) {",
+                    "  console.warn('Skip ' + pm.info.requestName + ': ' + reason);",
+                    "  if (pm.execution && typeof pm.execution.skipRequest === 'function') { pm.execution.skipRequest(); }",
+                    "}",
+                    "const needed = ['created_batch_id','created_student_id','created_inquiry_id','created_homework_id','created_notice_id','created_holiday_id','created_todo_id','teacher_id','staff_id','student_id','inquiry_id','exam_id','result_announcement_id','homework_id','study_material_id','notice_id','holiday_id','todo_id','payment_id','invoice_id','gst_invoice_id','ie_entry_id','ie_category_id','attendance_student_id','batch_id','user_id'];",
+                    "const resolved = String(pm.request.url.toString() || '').split('?')[0];",
+                    "for (const key of needed) {",
+                    "  const ph = '{{' + key + '}}';",
+                    "  if (resolved.indexOf(ph) === -1) { continue; }",
+                    "  if (envVal(key)) { continue; }",
+                    "  skip('empty ' + key);",
+                    "  return;",
+                    "}",
+                    "const segs = pm.request.url.path || [];",
+                    "for (const seg of segs) {",
+                    "  const s = String(seg);",
+                    "  const m = s.match(/^\\{\\{([^}]+)\\}\\}$/);",
+                    "  if (m && !envVal(m[1])) { skip('empty path ' + m[1]); return; }",
+                    "  const out = pm.variables.replaceIn(s).trim();",
+                    "  if (out === '') { skip('blank path segment'); return; }",
+                    "}",
+                    "const requiredByName = {",
+                    "  'Batch detail': 'batch_id',",
+                    "  'Batch students': 'batch_id',",
+                    "  'Batch attendance tab': 'batch_id',",
+                    "  'Batch attendance report tab': 'batch_id',",
+                    "  'Batch exams tab': 'batch_id',",
+                    "  'Batch homework tab': 'batch_id',",
+                    "  'Batch notices tab': 'batch_id',",
+                    "  'Batch update (that QA row)': 'created_batch_id',",
+                    "  'Batch toggle status (that QA row)': 'created_batch_id',",
+                    "  'Teacher detail': 'teacher_id',",
+                    "  'Teacher batches': 'teacher_id',",
+                    "  'Teacher login history': 'teacher_id',",
+                    "  'Teacher attendance tab': 'teacher_id',",
+                    "  'Teacher assigned work': 'teacher_id',",
+                    "  'Update teacher': 'teacher_id',",
+                    "  'Toggle teacher status': 'teacher_id',",
+                    "  'Staff detail': 'staff_id',",
+                    "  'Staff attendance tab': 'staff_id',",
+                    "  'Staff login history': 'staff_id',",
+                    "  'Staff assigned work': 'staff_id',",
+                    "  'Toggle staff status': 'staff_id',",
+                    "  'Create staff (403 without staff.add)': 'staff_role_id',",
+                    "  'Student detail': 'student_id',",
+                    "  'Student update (that QA row)': 'created_student_id',",
+                    "  'Student toggle status (that QA row)': 'created_student_id',",
+                    "  'Inquiry detail': 'inquiry_id',",
+                    "  'Inquiry update (that QA row)': 'created_inquiry_id',",
+                    "  'Follow-up add (that QA inquiry)': 'created_inquiry_id',",
+                    "  'Teacher month calendar': 'teacher_id',",
+                    "  'Staff month calendar': 'staff_id'",
+                    "};",
+                    "const req = requiredByName[pm.info.requestName];",
+                    "if (req && !envVal(req)) { skip('empty ' + req); return; }",
+                    "if (/\\/batches\\/status(\\?|$)/.test(resolved)) { skip('missing batch id'); return; }",
+                    "if (/\\/teachers\\/(batches|login-history|attendance|assigned-work|status)(\\?|$)/.test(resolved)) { skip('missing teacher id'); return; }",
+                    "if (/\\/staff\\/(attendance|login-history|assigned-work|status)(\\?|$)/.test(resolved)) { skip('missing staff id'); return; }"
+                ]
+            }
+        }
+    ],
+    "item": [
+        {
+            "name": "Auth",
+            "item": [
+                {
+                    "name": "Login (saves token)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 200) { return; }",
+                                    "const json = pm.response.json();",
+                                    "const token = json?.data?.token;",
+                                    "if (token) { pm.collectionVariables.set('token', token); pm.environment.set('token', token); }",
+                                    "const user = json?.data?.user || json?.data;",
+                                    "if (user?.id) { pm.environment.set('user_id', String(user.id)); }",
+                                    "const branch = user?.branches?.[0];",
+                                    "if (branch?.id) { pm.environment.set('branch_id', String(branch.id)); }",
+                                    "const batch = user?.batches?.[0];",
+                                    "if (batch?.id) { pm.environment.set('batch_id', String(batch.id)); }",
+                                    "const child = user?.children?.[0];",
+                                    "if (child?.id) { pm.environment.set('student_id', String(child.id)); }",
+                                    "if (user?.teacher?.id) { pm.environment.set('teacher_id', String(user.teacher.id)); }",
+                                    "if (user?.staff?.id) { pm.environment.set('staff_id', String(user.staff.id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+                        },
+                        "url": "{{base_url}}/auth/login"
+                    }
+                },
+                {
+                    "name": "Me",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/auth/me"
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "if (pm.response.code !== 200) { return; }",
+                                    "const json = pm.response.json();",
+                                    "const user = json?.data?.user || json?.data;",
+                                    "if (user?.id) { pm.environment.set('user_id', String(user.id)); }",
+                                    "const branch = user?.branches?.[0];",
+                                    "if (branch?.id) { pm.environment.set('branch_id', String(branch.id)); }",
+                                    "const batch = user?.batches?.[0];",
+                                    "if (batch?.id) { pm.environment.set('batch_id', String(batch.id)); }",
+                                    "const child = user?.children?.[0];",
+                                    "if (child?.id) { pm.environment.set('student_id', String(child.id)); }",
+                                    "if (user?.teacher?.id) { pm.environment.set('teacher_id', String(user.teacher.id)); }",
+                                    "if (user?.staff?.id) { pm.environment.set('staff_id', String(user.staff.id)); }"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Profile update",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"{{profile_name}}\",\n  \"phone\": \"{{profile_phone}}\"\n}"
+                        },
+                        "url": "{{base_url}}/profile"
+                    }
+                },
+                {
+                    "name": "Change password",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"current_password\": \"{{password}}\",\n  \"password\": \"{{new_password}}\",\n  \"password_confirmation\": \"{{new_password}}\"\n}"
+                        },
+                        "url": "{{base_url}}/auth/change-password"
+                    }
+                },
+                {
+                    "name": "Logout (revokes token \u2014 run last)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/auth/logout"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Dashboard",
+            "item": [
+                {
+                    "name": "Dashboard",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/dashboard"
+                    }
+                },
+                {
+                    "name": "Dashboard widget",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/dashboard/data/{{widget}}"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Branch & Batches",
+            "item": [
+                {
+                    "name": "My branches",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/branch"
+                    }
+                },
+                {
+                    "name": "Batches list",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 200) { return; }",
+                                    "const json = pm.response.json();",
+                                    "const id = json?.data?.items?.[0]?.id;",
+                                    "if (id) { pm.environment.set('batch_id', String(id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/batches?per_page=15&status=active",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "batches"
+                            ],
+                            "query": [
+                                {
+                                    "key": "per_page",
+                                    "value": "15"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "active"
+                                },
+                                {
+                                    "key": "branch_id",
+                                    "value": "{{branch_id}}",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "standard_id",
+                                    "value": "{{standard_id}}",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Batch detail",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/batches/{{batch_id}}"
+                    }
+                },
+                {
+                    "name": "Batch students",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/batches/{{batch_id}}/students"
+                    }
+                },
+                {
+                    "name": "Batch attendance tab",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/batches/{{batch_id}}/attendance?date={{attendance_date}}"
+                    }
+                },
+                {
+                    "name": "Batch attendance report tab",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/batches/{{batch_id}}/attendance-report?year={{attendance_year}}&month={{attendance_month}}"
+                    }
+                },
+                {
+                    "name": "Batch exams tab",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/batches/{{batch_id}}/exams"
+                    }
+                },
+                {
+                    "name": "Batch homework tab",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/batches/{{batch_id}}/homework"
+                    }
+                },
+                {
+                    "name": "Batch notices tab",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/batches/{{batch_id}}/notices"
+                    }
+                },
+                {
+                    "name": "Batch create (new QA row)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 201 && pm.response.code !== 200) { return; }",
+                                    "const id = pm.response.json()?.data?.id;",
+                                    "if (id) { pm.environment.set('created_batch_id', String(id)); pm.environment.set('batch_id', String(id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Postman QA Batch {{$timestamp}}\",\n  \"branch_id\": {{branch_id}},\n  \"standard_id\": {{standard_id}},\n  \"status\": \"active\",\n  \"academic_year\": \"2026-27\",\n  \"capacity\": 20,\n  \"start_time\": \"09:00\",\n  \"end_time\": \"10:00\"\n}"
+                        },
+                        "url": "{{base_url}}/batches"
+                    }
+                },
+                {
+                    "name": "Batch update (that QA row)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Postman QA Batch Updated {{$timestamp}}\",\n  \"branch_id\": {{branch_id}},\n  \"standard_id\": {{standard_id}},\n  \"status\": \"active\",\n  \"academic_year\": \"2026-27\",\n  \"capacity\": 25\n}"
+                        },
+                        "url": "{{base_url}}/batches/{{created_batch_id}}"
+                    }
+                },
+                {
+                    "name": "Batch toggle status (that QA row)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/batches/{{created_batch_id}}/status"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Teachers",
+            "item": [
+                {
+                    "name": "Teachers list",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 200) { return; }",
+                                    "const id = pm.response.json()?.data?.items?.[0]?.id;",
+                                    "if (id) { pm.environment.set('teacher_id', String(id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/teachers?per_page=15&status=active"
+                    }
+                },
+                {
+                    "name": "Teacher detail",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/teachers/{{teacher_id}}"
+                    }
+                },
+                {
+                    "name": "Teacher batches",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/teachers/{{teacher_id}}/batches"
+                    }
+                },
+                {
+                    "name": "Teacher login history",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/teachers/{{teacher_id}}/login-history"
+                    }
+                },
+                {
+                    "name": "Teacher attendance tab",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/teachers/{{teacher_id}}/attendance?year={{attendance_year}}&month={{attendance_month}}"
+                    }
+                },
+                {
+                    "name": "Teacher assigned work",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/teachers/{{teacher_id}}/assigned-work"
+                    }
+                },
+                {
+                    "name": "Create teacher (403 without teacher.add)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Postman QA Teacher\",\n  \"email\": \"qa.teacher.{{$timestamp}}@example.test\",\n  \"password\": \"Password123\",\n  \"password_confirmation\": \"Password123\",\n  \"status\": \"active\",\n  \"primary_branch_id\": {{branch_id}},\n  \"batch_ids\": [{{batch_id}}]\n}"
+                        },
+                        "url": "{{base_url}}/teachers"
+                    }
+                },
+                {
+                    "name": "Update teacher",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Postman QA Teacher\",\n  \"email\": \"qa.teacher.updated@example.test\",\n  \"status\": \"active\",\n  \"primary_branch_id\": {{branch_id}},\n  \"batch_ids\": [{{batch_id}}]\n}"
+                        },
+                        "url": "{{base_url}}/teachers/{{teacher_id}}"
+                    }
+                },
+                {
+                    "name": "Toggle teacher status",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/teachers/{{teacher_id}}/status"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Staff",
+            "item": [
+                {
+                    "name": "Staff list",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 200) { return; }",
+                                    "const id = pm.response.json()?.data?.items?.[0]?.id;",
+                                    "if (id) { pm.environment.set('staff_id', String(id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/staff?per_page=15"
+                    }
+                },
+                {
+                    "name": "Staff detail",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/staff/{{staff_id}}"
+                    }
+                },
+                {
+                    "name": "Staff attendance tab",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/staff/{{staff_id}}/attendance?year={{attendance_year}}&month={{attendance_month}}"
+                    }
+                },
+                {
+                    "name": "Staff login history",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/staff/{{staff_id}}/login-history"
+                    }
+                },
+                {
+                    "name": "Staff assigned work",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/staff/{{staff_id}}/assigned-work"
+                    }
+                },
+                {
+                    "name": "Staff roles (for create form)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/staff/roles"
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "if (pm.response.code !== 200) { return; }",
+                                    "const id = pm.response.json()?.data?.items?.[0]?.id;",
+                                    "if (id) { pm.environment.set('staff_role_id', String(id)); }"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Create staff (403 without staff.add)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Postman QA Staff\",\n  \"email\": \"qa.staff.{{$timestamp}}@example.test\",\n  \"password\": \"Password123\",\n  \"password_confirmation\": \"Password123\",\n  \"status\": \"active\",\n  \"primary_branch_id\": {{branch_id}},\n  \"role_id\": {{staff_role_id}}\n}"
+                        },
+                        "url": "{{base_url}}/staff"
+                    }
+                },
+                {
+                    "name": "Toggle staff status",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/staff/{{staff_id}}/status"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Students",
+            "item": [
+                {
+                    "name": "Students list",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 200) { return; }",
+                                    "const id = pm.response.json()?.data?.items?.[0]?.id;",
+                                    "if (id) { pm.environment.set('student_id', String(id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/students?per_page=15&status=active"
+                    }
+                },
+                {
+                    "name": "Student detail",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/students/{{student_id}}"
+                    }
+                },
+                {
+                    "name": "Student create (new QA row)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 201 && pm.response.code !== 200) { return; }",
+                                    "const json = pm.response.json();",
+                                    "const id = json?.data?.id;",
+                                    "if (id) { pm.environment.set('created_student_id', String(id)); }",
+                                    "const email = json?.data?.parent?.email;",
+                                    "if (email) { pm.environment.set('created_father_email', email); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Postman QA Student {{$timestamp}}\",\n  \"dob\": \"2014-06-15\",\n  \"gender\": \"Male\",\n  \"category\": \"General\",\n  \"admission_date\": \"2026-10-20\",\n  \"branch_id\": {{branch_id}},\n  \"standard_id\": {{standard_id}},\n  \"father_name\": \"QA Father\",\n  \"father_email\": \"qa.father.{{$timestamp}}@test.local\",\n  \"father_phone\": \"9000011111\",\n  \"status\": \"active\",\n  \"enrollments\": [\n    { \"batch_id\": {{batch_id}}, \"total_fees\": 1000, \"discount\": 0 }\n  ]\n}"
+                        },
+                        "url": "{{base_url}}/students"
+                    }
+                },
+                {
+                    "name": "Student update (that QA row)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Postman QA Student Updated\",\n  \"dob\": \"2014-06-15\",\n  \"gender\": \"Male\",\n  \"category\": \"General\",\n  \"admission_date\": \"2026-10-20\",\n  \"branch_id\": {{branch_id}},\n  \"standard_id\": {{standard_id}},\n  \"father_name\": \"QA Father\",\n  \"father_email\": \"{{created_father_email}}\",\n  \"father_phone\": \"9000011111\",\n  \"status\": \"active\",\n  \"enrollments\": [\n    { \"batch_id\": {{batch_id}}, \"total_fees\": 1200, \"discount\": 0 }\n  ]\n}"
+                        },
+                        "url": "{{base_url}}/students/{{created_student_id}}"
+                    }
+                },
+                {
+                    "name": "Student toggle status (that QA row)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/students/{{created_student_id}}/status"
+                    }
+                },
+                {
+                    "name": "Student form-fee receipt JSON",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/students/{{student_id}}/receipt"
+                    }
+                },
+                {
+                    "name": "Student form-fee receipt PDF",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/pdf"
+                            }
+                        ],
+                        "url": "{{base_url}}/students/{{student_id}}/receipt-pdf"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Inquiries",
+            "item": [
+                {
+                    "name": "Inquiries list",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 200) { return; }",
+                                    "const id = pm.response.json()?.data?.items?.[0]?.id;",
+                                    "if (id) { pm.environment.set('inquiry_id', String(id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/inquiries?per_page=15",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "inquiries"
+                            ],
+                            "query": [
+                                {
+                                    "key": "per_page",
+                                    "value": "15"
+                                },
+                                {
+                                    "key": "branch_id",
+                                    "value": "{{branch_id}}",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "standard_id",
+                                    "value": "{{standard_id}}",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "follow_up",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Inquiry detail",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/inquiries/{{inquiry_id}}"
+                    }
+                },
+                {
+                    "name": "Inquiry create (new QA row)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 201 && pm.response.code !== 200) { return; }",
+                                    "const id = pm.response.json()?.data?.id;",
+                                    "if (id) { pm.environment.set('created_inquiry_id', String(id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"student_name\": \"Postman QA Inquiry {{$timestamp}}\",\n  \"father_name\": \"QA Father\",\n  \"father_email\": \"qa.inquiry.{{$timestamp}}@test.local\",\n  \"father_phone\": \"9000022222\",\n  \"gender\": \"Male\",\n  \"category\": \"General\",\n  \"inquiry_date\": \"2026-10-20\",\n  \"follow_up_date\": \"2026-10-25\",\n  \"follow_up_remark\": \"Postman first follow-up\",\n  \"branch_id\": {{branch_id}},\n  \"standard_id\": {{standard_id}},\n  \"source\": \"walk-in\"\n}"
+                        },
+                        "url": "{{base_url}}/inquiries"
+                    }
+                },
+                {
+                    "name": "Inquiry update (that QA row)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"student_name\": \"Postman QA Inquiry Updated\",\n  \"father_name\": \"QA Father\",\n  \"father_email\": \"qa.inquiry.updated@test.local\",\n  \"father_phone\": \"9000022222\",\n  \"gender\": \"Male\",\n  \"category\": \"General\",\n  \"inquiry_date\": \"2026-10-20\",\n  \"follow_up_date\": \"2026-10-26\",\n  \"follow_up_remark\": \"Postman update follow-up\",\n  \"branch_id\": {{branch_id}},\n  \"standard_id\": {{standard_id}},\n  \"source\": \"walk-in\"\n}"
+                        },
+                        "url": "{{base_url}}/inquiries/{{created_inquiry_id}}"
+                    }
+                },
+                {
+                    "name": "Follow-ups list",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/follow-ups?per_page=15&status=pending",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "follow-ups"
+                            ],
+                            "query": [
+                                {
+                                    "key": "per_page",
+                                    "value": "15"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "pending"
+                                },
+                                {
+                                    "key": "branch_id",
+                                    "value": "{{branch_id}}",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Follow-up add (that QA inquiry)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"remark\": \"Postman extra follow-up\",\n  \"next_follow_up_at\": \"2026-10-28\"\n}"
+                        },
+                        "url": "{{base_url}}/follow-ups/{{created_inquiry_id}}"
+                    }
+                },
+                {
+                    "name": "Inquiry form-fee receipt JSON",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/inquiries/{{inquiry_id}}/receipt"
+                    }
+                },
+                {
+                    "name": "Inquiry form-fee receipt PDF",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/pdf"
+                            }
+                        ],
+                        "url": "{{base_url}}/inquiries/{{inquiry_id}}/receipt-pdf"
+                    }
+                },
+                {
+                    "name": "Inquiry convert prefill",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/inquiries/{{inquiry_id}}/convert"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Attendance",
+            "item": [
+                {
+                    "name": "Student roster (QA date)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 200) { return; }",
+                                    "const studentId = pm.response.json()?.data?.students?.[0]?.student_id;",
+                                    "if (studentId) { pm.environment.set('attendance_student_id', String(studentId)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/attendance/student?batch_id={{batch_id}}&date={{attendance_date}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "attendance",
+                                "student"
+                            ],
+                            "query": [
+                                {
+                                    "key": "batch_id",
+                                    "value": "{{batch_id}}"
+                                },
+                                {
+                                    "key": "date",
+                                    "value": "{{attendance_date}}"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Student mark (that QA date)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"attendance_date\": \"{{attendance_date}}\",\n  \"records\": [\n    { \"student_id\": {{attendance_student_id}}, \"status\": \"present\" }\n  ]\n}"
+                        },
+                        "url": "{{base_url}}/attendance/student/{{batch_id}}"
+                    }
+                },
+                {
+                    "name": "Student batch month report",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/attendance/student/reports/batch/{{batch_id}}?year={{attendance_year}}&month={{attendance_month}}"
+                    }
+                },
+                {
+                    "name": "Student month calendar",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/attendance/student/reports/student/{{attendance_student_id}}?batch_id={{batch_id}}&year={{attendance_year}}&month={{attendance_month}}"
+                    }
+                },
+                {
+                    "name": "Teacher/staff roster (QA date)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 200) { return; }",
+                                    "const json = pm.response.json();",
+                                    "const first = json?.data?.staff?.[0];",
+                                    "if (first?.user_id) { pm.environment.set('attendance_user_id', String(first.user_id)); }",
+                                    "if (first?.profile_type === 'teacher' && first?.profile_id) { pm.environment.set('teacher_id', String(first.profile_id)); }",
+                                    "if (first?.profile_type === 'staff' && first?.profile_id) { pm.environment.set('staff_id', String(first.profile_id)); }",
+                                    "const teacher = (json?.data?.staff || []).find(r => r.profile_type === 'teacher');",
+                                    "if (teacher?.profile_id) { pm.environment.set('teacher_id', String(teacher.profile_id)); }",
+                                    "const staff = (json?.data?.staff || []).find(r => r.profile_type === 'staff');",
+                                    "if (staff?.profile_id) { pm.environment.set('staff_id', String(staff.profile_id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/attendance/teacher?date={{attendance_date}}&branch_id={{branch_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "attendance",
+                                "teacher"
+                            ],
+                            "query": [
+                                {
+                                    "key": "date",
+                                    "value": "{{attendance_date}}"
+                                },
+                                {
+                                    "key": "branch_id",
+                                    "value": "{{branch_id}}"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Teacher/staff mark (that QA date)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"attendance_date\": \"{{attendance_date}}\",\n  \"branch_id\": {{branch_id}},\n  \"records\": [\n    { \"user_id\": {{attendance_user_id}}, \"status\": \"present\" }\n  ]\n}"
+                        },
+                        "url": "{{base_url}}/attendance/teacher"
+                    }
+                },
+                {
+                    "name": "Teacher month calendar",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/attendance/teacher/reports/teacher/{{teacher_id}}?year={{attendance_year}}&month={{attendance_month}}"
+                    }
+                },
+                {
+                    "name": "Staff month calendar",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/attendance/teacher/reports/staff/{{staff_id}}?year={{attendance_year}}&month={{attendance_month}}"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Exams",
+            "item": [
+                {
+                    "name": "Exams list",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 200) { return; }",
+                                    "const id = pm.response.json()?.data?.items?.[0]?.id;",
+                                    "if (id) { pm.environment.set('exam_id', String(id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/exams?per_page=15",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "exams"
+                            ],
+                            "query": [
+                                {
+                                    "key": "per_page",
+                                    "value": "15"
+                                },
+                                {
+                                    "key": "batch_id",
+                                    "value": "{{batch_id}}",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Exam detail",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/exams/{{exam_id}}"
+                    }
+                },
+                {
+                    "name": "Exam download",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/exams/{{exam_id}}/download"
+                    }
+                },
+                {
+                    "name": "Exam result sheet",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/exams/{{exam_id}}/result-sheet"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Result Announcements",
+            "item": [
+                {
+                    "name": "Results list",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 200) { return; }",
+                                    "const id = pm.response.json()?.data?.items?.[0]?.id;",
+                                    "if (id) { pm.environment.set('result_announcement_id', String(id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/result-announcements?per_page=15",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "result-announcements"
+                            ],
+                            "query": [
+                                {
+                                    "key": "per_page",
+                                    "value": "15"
+                                },
+                                {
+                                    "key": "batch_id",
+                                    "value": "{{batch_id}}",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Result detail",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/result-announcements/{{result_announcement_id}}"
+                    }
+                },
+                {
+                    "name": "Result preview",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/result-announcements/{{result_announcement_id}}/preview"
+                    }
+                },
+                {
+                    "name": "Result export PDF",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/pdf"
+                            }
+                        ],
+                        "url": "{{base_url}}/result-announcements/{{result_announcement_id}}/export-pdf"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Homework",
+            "item": [
+                {
+                    "name": "Homework list",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 200) { return; }",
+                                    "const id = pm.response.json()?.data?.items?.[0]?.id;",
+                                    "if (id) { pm.environment.set('homework_id', String(id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/homework?per_page=15"
+                    }
+                },
+                {
+                    "name": "Homework detail",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/homework/{{homework_id}}"
+                    }
+                },
+                {
+                    "name": "Homework download",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/homework/{{homework_id}}/download"
+                    }
+                },
+                {
+                    "name": "Homework create (new QA row)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 201 && pm.response.code !== 200) { return; }",
+                                    "const id = pm.response.json()?.data?.id;",
+                                    "if (id) { pm.environment.set('created_homework_id', String(id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Postman QA Homework {{$timestamp}}\",\n  \"type\": \"text\",\n  \"description\": \"Postman homework\",\n  \"batch_id\": {{batch_id}},\n  \"homework_date\": \"2026-03-20\",\n  \"due_date\": \"2026-03-22\"\n}"
+                        },
+                        "url": "{{base_url}}/homework"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Study Materials",
+            "item": [
+                {
+                    "name": "Study materials list",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 200) { return; }",
+                                    "const id = pm.response.json()?.data?.items?.[0]?.id;",
+                                    "if (id) { pm.environment.set('study_material_id', String(id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/study-materials?per_page=15&batch_id={{batch_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "study-materials"
+                            ],
+                            "query": [
+                                {
+                                    "key": "per_page",
+                                    "value": "15"
+                                },
+                                {
+                                    "key": "batch_id",
+                                    "value": "{{batch_id}}",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Study material detail",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/study-materials/{{study_material_id}}"
+                    }
+                },
+                {
+                    "name": "Study material download",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/study-materials/{{study_material_id}}/download"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Notices",
+            "item": [
+                {
+                    "name": "Notices list",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 200) { return; }",
+                                    "const id = pm.response.json()?.data?.items?.[0]?.id;",
+                                    "if (id) { pm.environment.set('notice_id', String(id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/notices?per_page=15"
+                    }
+                },
+                {
+                    "name": "Notice detail",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/notices/{{notice_id}}"
+                    }
+                },
+                {
+                    "name": "Notice create (new QA row)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 201 && pm.response.code !== 200) { return; }",
+                                    "const id = pm.response.json()?.data?.id;",
+                                    "if (id) { pm.environment.set('created_notice_id', String(id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Postman QA Notice {{$timestamp}}\",\n  \"body\": \"Postman notice\",\n  \"notice_date\": \"2026-03-20\",\n  \"audience\": \"all\",\n  \"branch_ids\": [{{branch_id}}],\n  \"batch_ids\": [{{batch_id}}]\n}"
+                        },
+                        "url": "{{base_url}}/notices"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Holidays",
+            "item": [
+                {
+                    "name": "Holidays list",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 200) { return; }",
+                                    "const id = pm.response.json()?.data?.items?.[0]?.id;",
+                                    "if (id) { pm.environment.set('holiday_id', String(id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/holidays?per_page=15&branch_id={{branch_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "holidays"
+                            ],
+                            "query": [
+                                {
+                                    "key": "per_page",
+                                    "value": "15"
+                                },
+                                {
+                                    "key": "branch_id",
+                                    "value": "{{branch_id}}",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Holiday create (QA row)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 201 && pm.response.code !== 200) { return; }",
+                                    "const id = pm.response.json()?.data?.id;",
+                                    "if (id) { pm.environment.set('created_holiday_id', String(id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Postman QA Holiday {{$timestamp}}\",\n  \"start_date\": \"2026-12-24\",\n  \"end_date\": \"2026-12-26\",\n  \"reason\": \"Postman QA\",\n  \"branch_ids\": [{{branch_id}}],\n  \"batch_ids\": []\n}"
+                        },
+                        "url": "{{base_url}}/holidays"
+                    }
+                },
+                {
+                    "name": "Holiday update (that QA row)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Postman QA Holiday Updated\",\n  \"start_date\": \"2026-12-24\",\n  \"end_date\": \"2026-12-25\",\n  \"reason\": \"Postman QA updated\",\n  \"branch_ids\": [{{branch_id}}],\n  \"batch_ids\": []\n}"
+                        },
+                        "url": "{{base_url}}/holidays/{{created_holiday_id}}"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "To-Dos",
+            "item": [
+                {
+                    "name": "Todos list",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 200) { return; }",
+                                    "const id = pm.response.json()?.data?.items?.[0]?.id;",
+                                    "if (id) { pm.environment.set('todo_id', String(id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/todos?per_page=15"
+                    }
+                },
+                {
+                    "name": "Todo create (new QA row)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 201 && pm.response.code !== 200) { return; }",
+                                    "const id = pm.response.json()?.data?.id;",
+                                    "if (id) { pm.environment.set('created_todo_id', String(id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"assigned_to_user_ids\": [{{user_id}}],\n  \"due_date\": \"2026-03-25\",\n  \"tasks\": [{ \"title\": \"Postman QA Todo {{$timestamp}}\" }]\n}"
+                        },
+                        "url": "{{base_url}}/todos"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Users",
+            "item": [
+                {
+                    "name": "Users tab teacher",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/users?tab=teacher&per_page=15"
+                    }
+                },
+                {
+                    "name": "Users tab principal",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/users?tab=principal&per_page=15"
+                    }
+                },
+                {
+                    "name": "Users tab branch_manager",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/users?tab=branch_manager&per_page=15"
+                    }
+                },
+                {
+                    "name": "User permissions",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/users/{{user_id}}/permissions"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Leave",
+            "item": [
+                {
+                    "name": "Staff leave list",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/leave-requests/staff?per_page=15"
+                    }
+                },
+                {
+                    "name": "Student leave list",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/leave-requests/student?per_page=15"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Exports",
+            "item": [
+                {
+                    "name": "Export students CSV",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "text/csv"
+                            }
+                        ],
+                        "url": "{{base_url}}/export/students"
+                    }
+                },
+                {
+                    "name": "Export student attendance CSV",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "text/csv"
+                            }
+                        ],
+                        "url": "{{base_url}}/export/students/{{student_id}}/attendance?batch_id={{batch_id}}&year={{attendance_year}}&month={{attendance_month}}"
+                    }
+                },
+                {
+                    "name": "Export student results CSV",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "text/csv"
+                            }
+                        ],
+                        "url": "{{base_url}}/export/students/{{student_id}}/results"
+                    }
+                },
+                {
+                    "name": "Export inquiries CSV",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "text/csv"
+                            }
+                        ],
+                        "url": "{{base_url}}/export/inquiries"
+                    }
+                },
+                {
+                    "name": "Export follow-ups CSV",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "text/csv"
+                            }
+                        ],
+                        "url": "{{base_url}}/export/follow-ups"
+                    }
+                },
+                {
+                    "name": "Export todos CSV",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "text/csv"
+                            }
+                        ],
+                        "url": "{{base_url}}/export/todos"
+                    }
+                },
+                {
+                    "name": "Export batch students CSV",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "text/csv"
+                            }
+                        ],
+                        "url": "{{base_url}}/export/batches/{{batch_id}}/students"
+                    }
+                },
+                {
+                    "name": "Export batch attendance report CSV",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "text/csv"
+                            }
+                        ],
+                        "url": "{{base_url}}/export/batches/{{batch_id}}/attendance-report?year={{attendance_year}}&month={{attendance_month}}"
+                    }
+                },
+                {
+                    "name": "Export teacher attendance CSV",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "text/csv"
+                            }
+                        ],
+                        "url": "{{base_url}}/export/teachers/{{teacher_id}}/attendance?year={{attendance_year}}&month={{attendance_month}}"
+                    }
+                },
+                {
+                    "name": "Export teacher homework CSV",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "text/csv"
+                            }
+                        ],
+                        "url": "{{base_url}}/export/teachers/{{teacher_id}}/homework"
+                    }
+                },
+                {
+                    "name": "Export staff attendance CSV",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "text/csv"
+                            }
+                        ],
+                        "url": "{{base_url}}/export/staff/{{staff_id}}/attendance?year={{attendance_year}}&month={{attendance_month}}"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Fees",
+            "item": [
+                {
+                    "name": "Payments list",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 200) { return; }",
+                                    "const json = pm.response.json();",
+                                    "const first = json?.data?.items?.[0];",
+                                    "if (first?.id) { pm.environment.set('payment_id', String(first.id)); }",
+                                    "if (first?.student?.id) { pm.environment.set('student_id', String(first.student.id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/fees?per_page=15",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "fees"
+                            ],
+                            "query": [
+                                {
+                                    "key": "per_page",
+                                    "value": "15"
+                                },
+                                {
+                                    "key": "branch_id",
+                                    "value": "{{branch_id}}",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "batch_id",
+                                    "value": "{{batch_id}}",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Student fee summary",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/fees/student-summary?student_id={{student_id}}"
+                    }
+                },
+                {
+                    "name": "Fee receipt JSON",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/fees/{{payment_id}}/receipt"
+                    }
+                },
+                {
+                    "name": "Fee receipt PDF",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/pdf"
+                            }
+                        ],
+                        "url": "{{base_url}}/fees/{{payment_id}}/receipt-pdf"
+                    }
+                },
+                {
+                    "name": "Collect fee (accountant)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 201) { return; }",
+                                    "const json = pm.response.json();",
+                                    "if (json?.data?.id) { pm.environment.set('payment_id', String(json.data.id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"student_id\": {{student_id}},\n  \"batch_id\": {{batch_id}},\n  \"payment_date\": \"{{$isoTimestamp}}\",\n  \"amount\": 1,\n  \"payment_method\": \"Cash\",\n  \"note\": \"Postman QA collect\"\n}"
+                        },
+                        "url": "{{base_url}}/fees"
+                    }
+                },
+                {
+                    "name": "Delete fee payment (403 default accountant)",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/fees/{{payment_id}}"
+                    }
+                },
+                {
+                    "name": "Fee follow-ups (due invoices)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 200) { return; }",
+                                    "const json = pm.response.json();",
+                                    "const first = json?.data?.items?.[0];",
+                                    "if (first?.id) { pm.environment.set('invoice_id', String(first.id)); }",
+                                    "if (first?.student?.id) { pm.environment.set('student_id', String(first.student.id)); }",
+                                    "if (first?.batch?.id) { pm.environment.set('batch_id', String(first.batch.id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/fees/follow-ups?per_page=15"
+                    }
+                },
+                {
+                    "name": "Log fee follow-up",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"remark\": \"Postman QA follow-up\",\n  \"next_follow_up_at\": null\n}"
+                        },
+                        "url": "{{base_url}}/fees/follow-ups/{{invoice_id}}"
+                    }
+                },
+                {
+                    "name": "Fee follow-up export PDF (403 default accountant)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/pdf"
+                            }
+                        ],
+                        "url": "{{base_url}}/fees/follow-ups/export-pdf"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "GST invoices",
+            "item": [
+                {
+                    "name": "GST invoices list",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 200) { return; }",
+                                    "const json = pm.response.json();",
+                                    "const first = json?.data?.items?.[0];",
+                                    "if (first?.id) { pm.environment.set('gst_invoice_id', String(first.id)); }",
+                                    "if (first?.payment?.id) { pm.environment.set('payment_id', String(first.payment.id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/gst-invoices?per_page=15"
+                    }
+                },
+                {
+                    "name": "Generate GST from payment",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (![200, 201].includes(pm.response.code)) { return; }",
+                                    "const json = pm.response.json();",
+                                    "if (json?.data?.id) { pm.environment.set('gst_invoice_id', String(json.data.id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/gst-invoices/generate/{{payment_id}}"
+                    }
+                },
+                {
+                    "name": "GST invoice show",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/gst-invoices/{{gst_invoice_id}}"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Income & Expense",
+            "item": [
+                {
+                    "name": "Income-expense list",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 200) { return; }",
+                                    "const json = pm.response.json();",
+                                    "const first = json?.data?.items?.[0];",
+                                    "if (first?.id) { pm.environment.set('ie_entry_id', String(first.id)); }",
+                                    "if (first?.category?.id) { pm.environment.set('ie_category_id', String(first.category.id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/income-expense?per_page=15",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "income-expense"
+                            ],
+                            "query": [
+                                {
+                                    "key": "per_page",
+                                    "value": "15"
+                                },
+                                {
+                                    "key": "type",
+                                    "value": "expense",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create income-expense entry",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 201) { return; }",
+                                    "const json = pm.response.json();",
+                                    "if (json?.data?.id) { pm.environment.set('ie_entry_id', String(json.data.id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"category_id\": {{ie_category_id}},\n  \"title\": \"Postman QA expense\",\n  \"amount\": 1,\n  \"entry_date\": \"{{$isoTimestamp}}\",\n  \"payment_method\": \"Cash\",\n  \"note\": \"Postman QA\"\n}"
+                        },
+                        "url": "{{base_url}}/income-expense"
+                    }
+                },
+                {
+                    "name": "Delete income-expense entry (403 default accountant)",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/income-expense/{{ie_entry_id}}"
+                    }
+                },
+                {
+                    "name": "I&E categories list",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 200) { return; }",
+                                    "const json = pm.response.json();",
+                                    "const first = json?.data?.items?.[0];",
+                                    "if (first?.id) { pm.environment.set('ie_category_id', String(first.id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/income-expense-categories?per_page=15"
+                    }
+                },
+                {
+                    "name": "Create I&E category",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 201) { return; }",
+                                    "const json = pm.response.json();",
+                                    "if (json?.data?.id) { pm.environment.set('ie_category_id', String(json.data.id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Postman QA {{$timestamp}}\",\n  \"type\": \"expense\",\n  \"status\": \"active\"\n}"
+                        },
+                        "url": "{{base_url}}/income-expense-categories"
+                    }
+                },
+                {
+                    "name": "Update I&E category",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Postman QA updated\",\n  \"type\": \"expense\",\n  \"status\": \"active\"\n}"
+                        },
+                        "url": "{{base_url}}/income-expense-categories/{{ie_category_id}}"
+                    }
+                },
+                {
+                    "name": "Toggle I&E category status",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/income-expense-categories/{{ie_category_id}}/status"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Inventory",
+            "item": [
+                {
+                    "name": "Inventory assets list (403 without inventory.view)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 200) { return; }",
+                                    "const json = pm.response.json();",
+                                    "const first = json?.data?.items?.[0];",
+                                    "if (first?.id) { pm.environment.set('inventory_asset_id', String(first.id)); }",
+                                    "if (first?.category?.id) { pm.environment.set('asset_category_id', String(first.category.id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/inventory-assets?per_page=15"
+                    }
+                },
+                {
+                    "name": "Asset categories list",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 200) { return; }",
+                                    "const json = pm.response.json();",
+                                    "const first = json?.data?.items?.[0];",
+                                    "if (first?.id) { pm.environment.set('asset_category_id', String(first.id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/asset-categories?per_page=15"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Subjects & Standards",
+            "item": [
+                {
+                    "name": "Subjects list (403 without subject.view)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code !== 200) { return; }",
+                                    "const json = pm.response.json();",
+                                    "const first = json?.data?.items?.[0];",
+                                    "if (first?.id) { pm.environment.set('subject_id', String(first.id)); }"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/subjects?per_page=15"
+                    }
+                },
+                {
+                    "name": "Standards list (403 without standard.view)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/standards?per_page=15"
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "token",
+            "value": ""
+        }
+    ]
+}

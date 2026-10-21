@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -10,13 +11,13 @@ class EnsureInstituteActive
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $user = $request->user();
+        $user = $this->freshAuthenticatedUser($request);
 
         // Spatie teams: bind AFTER auth so institute_admin permissions resolve.
         SyncPermissionsTeamFromAuth::sync($user);
 
         if (! $user || $user->isPlatformUser()) {
-            return $next($request);
+            return $this->withoutBrowserCache($next($request));
         }
 
         $institute = $user->institute;
@@ -55,7 +56,34 @@ class EnsureInstituteActive
             abort(403, 'Trial expired. Please upgrade your plan.');
         }
 
-        return $next($request);
+        return $this->withoutBrowserCache($next($request));
+    }
+
+    protected function freshAuthenticatedUser(Request $request): ?User
+    {
+        $user = $request->user();
+        if (! $user) {
+            return null;
+        }
+
+        $fresh = User::query()->find($user->id);
+        if (! $fresh) {
+            return $user;
+        }
+
+        auth()->setUser($fresh);
+        $request->setUserResolver(static fn () => $fresh);
+
+        return $fresh;
+    }
+
+    protected function withoutBrowserCache(Response $response): Response
+    {
+        $response->headers->set('Cache-Control', 'private, no-store, no-cache, must-revalidate, max-age=0');
+        $response->headers->set('Pragma', 'no-cache');
+        $response->headers->set('Expires', '0');
+
+        return $response;
     }
 
     protected function isBillingExemptRoute(Request $request): bool
@@ -64,6 +92,8 @@ class EnsureInstituteActive
             'admin.billing.*',
             'profile.*',
             'logout',
+            'api.v1.auth.*',
+            'api.v1.profile.*',
         );
     }
 }
